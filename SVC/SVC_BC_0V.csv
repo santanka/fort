@@ -1,0 +1,9 @@
+species,N[m^-3],Tperp[eV],Tpara/Tperp,source,charge,mass
+Ionospheric:H+,2.d11,3.1d-1,1.d0,I,1.d0,1.6726231d-27
+Ionospheric:e-,2.d11,3.1d-1,1.d0,I,-1.d0,9.1093897d-31
+Io:O+,1.d9,7.d1,5.d-1,M,1.d0,2.677950266103d-26
+Io:S+,2.5d8,5.d1,1.d0,M,1.d0,5.355991626103d-26
+Io:S2+,0.d0,5.d1,1.d0,M,2.d0,5.355900532206d-26
+Io:H+,1.d6,2.d2,1.d0,M,1.d0,1.6726231d-27
+Io:cold:e-,1.25d9,5.d0,1.d0,M,-1.d0,9.1093897d-31
+Io:hot:e-,1.d6,2.d2,1.d0,M,-1.d0,9.1093897d-31

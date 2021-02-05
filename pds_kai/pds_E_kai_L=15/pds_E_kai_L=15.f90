@@ -2,7 +2,7 @@ program pds_E_kai !’n‹…
 
 implicit none
 
-!main‚Ì•¶š
+!main‚Ì•¶š‚Æ‚©
 integer :: h, i, j, s, itn !do•¶—p
 integer, parameter :: N = 501 !grid”
 integer, parameter :: Z = 300 !perp‘¬“xgrid”

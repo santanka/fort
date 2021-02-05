@@ -86,7 +86,6 @@ character(len=128) :: filepote = 'pds_E_kai_L=15_2_potential.csv'
 character(len=128) :: filemin = 'pds_E_kai_L=15_2_min.csv'
 92 format(1PE25.15E3) !1
 character(len=128) :: filecheck = 'pds_E_kai_L=15_2_check.csv'
-62 format(1PE25.15E3, 19(',', 1PE25.15E3)) !kind+8
 52 format(1PE25.15E3, 4(',', 1PE25.15E3)) !5(double precision)
 42 format(I5)
 32 format(1PE25.15E3, 7(',', 1PE25.15E3)) !8(double precision)

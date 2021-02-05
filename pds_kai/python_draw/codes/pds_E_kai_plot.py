@@ -8,7 +8,7 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"C:\Users\mkroc\Desktop\fort-backup\pds_E_kai_L=15_2_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"pds_kai/pds_E_kai_L=15/pds_E_kai_L=15_2_all.csv", delimiter=',', unpack=True)
 
 channel = 6
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長
@@ -127,4 +127,4 @@ if (channel == 6):
     ax.legend()
     plt.rcParams["font.size"] = 25
 
- 
+plt.show()

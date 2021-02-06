@@ -9,10 +9,10 @@
             "command": "gfortran",
             "args":[
                 "-g",
-                "-O0",
+                "-O4",
                 "-o",
-                "${workspaceFolder}/${fileBasenameNoExtension}.out",
-                "${fileBasename}"
+                "${fileDirname}/${fileBasenameNoExtension}.out",
+                "${file}"
             ],
             "group": {
                 "kind": "build",

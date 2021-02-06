@@ -1,4 +1,4 @@
-species,N[m^-3],Tperp[eV],Tpara[eV],charge,mass,injection number (by CCMC)
+species,N[m^-3],Tperp[eV],Tpara[eV],charge,mass,injection number (by CCMC, eq's Tperp change)
 N:H+,1.17225d7,1.23d-1,1.23d-1,1.d0,1.67262189821d-27,255
 N:He+,1.17225d7,1.23d-1,1.23d-1,1.d0,6.64556638280897d-27,255
 N:N+,7.0335d9,1.23d-1,1.23d-1,1.d0,2.325779481662744d-26,255

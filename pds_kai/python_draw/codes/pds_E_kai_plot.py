@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 data = np.genfromtxt(r"pds_kai/pds_E_kai/pds_E_kai_5_all.csv", delimiter=',', unpack=True)
 
-channel = 1
+channel = 6
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長
 
 if (channel == 1):
@@ -18,11 +18,12 @@ if (channel == 1):
     x = np.rad2deg(x)
     y = data[3, :]
     fig = plt.figure()
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Electrostatic Potential [V]')    
     ax.plot(x, y)
     fig.suptitle('Electrostatic Potential')
     ax.grid()
-    plt.rcParams["font.size"] = 25
+    
 
 
 if (channel == 2):
@@ -30,6 +31,7 @@ if (channel == 2):
     x = np.rad2deg(x)
     y = data[4:16, :]*1.E-6
     fig = plt.figure()
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Number Density [cm^-3]', yscale='log', ylim=(1.E-2, 1.E6))   
     ax.plot(x, y[0, :]+y[5, :], c='orange', label='H+(ionosphere)')
     ax.plot(x, y[1, :]+y[6, :], c='red', label='He+')
@@ -41,24 +43,26 @@ if (channel == 2):
     fig.suptitle('Number Density')
     ax.grid()
     ax.legend()
-    plt.rcParams["font.size"] = 25
+    
 
 if (channel == 3):
     x = data[0, :]
     x = np.rad2deg(x)
     y = data[21, :]
     fig = plt.figure()
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Alfven Speed [/(Light Speed)]')
     ax.plot(x, y)
     fig.suptitle('Alfven Speed')
     ax.grid()
-    plt.rcParams["font.size"] = 25
+    
 
 if (channel == 4):
     x = data[0, :]
     x = np.rad2deg(x)
     y = data[70:79]*1.E9
     fig = plt.figure()
+    plt.rcParams["font.size"] = 25
     ax1 = fig.add_subplot(131, title='perpendicular')
     ax1.set_xlabel('S← MLT [degree] →N')
     ax1.set_ylabel('Pressure [nPa]')
@@ -86,7 +90,7 @@ if (channel == 4):
     ax3.plot(x, y[8, :], c='blue', label='electron')
     ax3.grid()
     ax3.legend()
-    plt.rcParams["font.size"] = 25
+    
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
 if (channel == 5):
@@ -95,13 +99,14 @@ if (channel == 5):
     y = data[82, :]
     z = data[88, :]
     fig = plt.figure()
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='beta', yscale='log')
     ax.plot(x, y, c='orange', label='beta')
     ax.plot(x, z, c='dimgrey', label='me/mi', linestyle='-.')
     fig.suptitle('beta(ion, perpendicular)')
     ax.grid()
     ax.legend()
-    plt.rcParams["font.size"] = 25
+    
 
 if (channel == 6):
     x = data[0, :]
@@ -113,6 +118,7 @@ if (channel == 6):
     elr3 = np.sqrt(2.*10.*9.1093837015E-31/1.602176634E-19)/BB
     elr4 = np.sqrt(2.*100.*9.1093837015E-31/1.602176634E-19)/BB
     fig = plt.figure()
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='length [m]', yscale='log')   
     ax.plot(x, y[0, :], c='orange', label='ion Larmor radius - KAW')
     #ax.plot(x, y[1, :], c='deepskyblue', label='electron Larmor radius')
@@ -125,6 +131,7 @@ if (channel == 6):
     fig.suptitle('Larmor radius & inertial length')
     ax.grid()
     ax.legend()
-    plt.rcParams["font.size"] = 25
 
+
+plt.tight_layout()
 plt.show()

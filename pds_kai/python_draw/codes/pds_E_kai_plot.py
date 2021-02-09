@@ -8,7 +8,7 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"pds_kai/pds_E_kai_L=15/pds_E_kai_L=15_2_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=15/pds_E_kai_L=15_2_all.csv", delimiter=',', unpack=True)
 
 channel = 6
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長
@@ -116,7 +116,7 @@ if (channel == 6):
     me = 9.1093837015E-31
     ee = 1.602176634E-19
     Ke = np.array([0.1, 1.0, 10., 100.])
-    Ke = Ke*ee
+    Ke = Ke*ee*1.E3
     cc = 2.99792458E+08
     length = len(BB)
     elr = np.zeros([4, length])

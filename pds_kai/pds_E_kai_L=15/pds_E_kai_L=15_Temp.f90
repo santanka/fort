@@ -32,7 +32,7 @@ double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !minファイルの導入
 integer, parameter :: kind = 12
-character(len=128) :: filemin = 'pds_E_kai_L=15_2_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_L=15_3_min.csv'
 double precision :: cvn !収束値
 double precision, dimension(N) :: lam !MLT
 double precision, dimension(N) :: ss !磁力線上の座標
@@ -88,7 +88,7 @@ double precision, dimension(N) :: ske !電子慣性長
 
 
 !保存ファイル
-character(len=128) :: fileall = 'pds_E_kai_L=15_2_all.csv'
+character(len=128) :: fileall = 'pds_E_kai_L=15_3_all.csv'
 !!lam(1), ss(2), BB(3), Phi(4), nd(5:kind+4), rhod(kind+5), rhop(kind+6), cvg(kind+7), VA(kind+8:kind+10),
 !!Vpara(kind+11:2*kind+10), Pperp(2*kind+11:3*kind+10), Ppara(3*kind+11:4*kind+10), PP(4*kind+11:5*kind+10),
 !!Pperpall(5*kind+11), Pparaall(5*kind+12), PPall(5*kind+13), Pperpalli(5*kind+14), Pparaalli(5*kind+15), PPalli(5*kind+16),
@@ -101,7 +101,7 @@ integer, parameter :: channel1 = 0 !座標固定, vperp vs vparaの分布関数(0:off, 1:
 integer, parameter :: N1 = 200
 integer, parameter :: channel2 = 0 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
 integer, parameter :: Z2 = 300
-character(len=128) :: fileoption = 'pds_E_kai_2_disfun_'
+character(len=128) :: fileoption = 'pds_E_kai_3_disfun_'
 
 
 !/////データ抽出/////

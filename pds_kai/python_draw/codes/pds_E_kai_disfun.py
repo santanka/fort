@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_4_disfun_s=12_MLT=0.46234700760877978.csv", delimiter=',', unpack=True)
-vperp = data1[4][:]
-vpara = data1[3][:]
+vperp = data1[2][:]
+vpara = data1[1][:]
 ff = data1[8][:]
 
 fig = plt.figure()

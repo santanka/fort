@@ -5,7 +5,7 @@ implicit none
 !mainの文字
 integer :: h, i, j, s, itn !do文用
 integer, parameter :: N = 255 !grid数
-integer, parameter :: Z = 300 !perp速度grid数
+integer, parameter :: Z = 500 !perp速度grid数
 integer, parameter :: MV = 128 !極小値となる座標
 integer, parameter :: CP = 0 !boundary以外の静電ポテンシャル無変化点
 double precision, parameter :: pi = 4.d0*atan(1.d0) !円周率
@@ -17,7 +17,7 @@ double precision, parameter :: cc = 2.99792458d+08 !光速
 double precision, parameter :: mu0 = 1.25663706143592d-06 !真空の透磁率
 double precision, parameter :: ep0 = 8.8541878128d-12 !真空の誘電率
 double precision, parameter :: GG = 6.6743015d-11 !万有引力定数
-double precision, parameter :: alpha = 12.d0 !vperpのlimit
+double precision, parameter :: cc_rate = 1.d0 !光速の割合
 
 !惑星のデータ
 double precision, parameter :: Mdp = 7.8d+22 !惑星の磁気双極子モーメント
@@ -33,7 +33,7 @@ double precision, parameter :: Ms = 0 !衛星の質量
 double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !Boundary Condition(粒子のデータ)
-character(len=128) :: fileBC = 'pds_BC_E_kai_6.csv'
+character(len=128) :: fileBC = 'pds_BC_E_kai_4.csv'
 integer, parameter :: kind = 12 !粒子種数
 integer, parameter :: nsc = 4 !boundary:Nでの数密度調整をする粒子
 integer, parameter :: ssc = 9 !boundary:Sでの数密度調整をする粒子
@@ -45,7 +45,7 @@ double precision, dimension(kind) :: mass !質量
 integer, dimension(kind) :: ijn !injection number
 
 !Initial Condition(初期静電ポテンシャル分布)
-character(len=128) :: fileIC = 'pds_IC_E_kai_6.csv'
+character(len=128) :: fileIC = 'pds_IC_E_kai_4.csv'
 double precision, dimension(N) :: Phi !静電ポテンシャル分布
 
 !場の設定
@@ -80,13 +80,13 @@ double precision, dimension(kind) :: nsig !数密度更新値
 
 !保存ファイル名
 integer, parameter :: channel = 1 !はじめから(1)orつづきから(2)
-character(len=128) :: fileresult = 'pds_E_kai_6_result.csv'
+character(len=128) :: fileresult = 'pds_E_kai_4_result.csv'
 72 format(1PE25.15E3, 18(',', 1PE25.15E3)) !kind+7
-character(len=128) :: filepote = 'pds_E_kai_6_potential.csv'
+character(len=128) :: filepote = 'pds_E_kai_4_potential.csv'
 82 format(1PE25.15E3, 15(',', 1PE25.15E3)) !kind+4
-character(len=128) :: filemin = 'pds_E_kai_6_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_4_min.csv'
 92 format(1PE25.15E3) !1
-character(len=128) :: filecheck = 'pds_E_kai_6_check.csv'
+character(len=128) :: filecheck = 'pds_E_kai_4_check.csv'
 62 format(1PE25.15E3, 19(',', 1PE25.15E3)) !kind+8
 52 format(1PE25.15E3, 4(',', 1PE25.15E3)) !5(double precision)
 42 format(I5)
@@ -154,7 +154,7 @@ BB = mu0*Mdp/4.d0/pi/(Lp*Rp)**3.d0 * sqrt(1.d0+3.d0*sin(lam)**2.d0) / cos(lam)**
 
 
 !断熱不変量
-call AI(N, Z, kind, alpha, Tperp, BB, ijn, mu)
+call AI(N, Z, kind, cc_rate, cc, mass, BB, ijn, mu)
 
 
 !/////以下iteration/////
@@ -276,11 +276,11 @@ end program pds_E_kai
 !subroutine & function
 
 !断熱不変量
-subroutine AI(N, Z, kind, alpha, Tperp, BB, ijn, mu)
+subroutine AI(N, Z, kind, cc_rate, cc, mass, BB, ijn, mu)
  implicit none
  integer, intent(in) :: N, Z, kind
- double precision, intent(in) :: alpha
- double precision, dimension(kind), intent(in) :: Tperp
+ double precision, intent(in) :: cc_rate, cc
+ double precision, dimension(kind), intent(in) :: mass
  double precision, dimension(N), intent(in) :: BB
  integer, dimension(kind), intent(in) :: ijn
  double precision, dimension(kind, Z), intent(out) :: mu
@@ -291,7 +291,7 @@ subroutine AI(N, Z, kind, alpha, Tperp, BB, ijn, mu)
   if(j == 1) then
     mu(:, j) = 0.d0
    else if(j /= 1) then
-    mu(:, j) = 1.d-30*(alpha*Tperp/BB(ijn)/1.d-30)**(dble(j-2)/dble(Z-2))
+    mu(:, j) = 1.d-30*(mass*(cc_rate*cc)**2.d0/2.d0/BB(ijn)/1.d-30)**(dble(j-2)/dble(Z-2))
   endif
  enddo !j
  

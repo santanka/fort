@@ -5,7 +5,7 @@ implicit none
 !mainの文字とか
 integer :: h, i, j, s, itn !do文用
 integer, parameter :: N = 501 !grid数
-integer, parameter :: Z = 300 !perp速度grid数
+integer, parameter :: Z = 500 !perp速度grid数
 integer, parameter :: MV = 251 !極小値となる座標
 integer, parameter :: CP = 0 !boundary以外の静電ポテンシャル無変化点
 double precision, parameter :: pi = 4.d0*atan(1.d0) !円周率
@@ -17,7 +17,7 @@ double precision, parameter :: cc = 2.99792458d+08 !光速
 double precision, parameter :: mu0 = 1.25663706143592d-06 !真空の透磁率
 double precision, parameter :: ep0 = 8.8541878128d-12 !真空の誘電率
 double precision, parameter :: GG = 6.6743015d-11 !万有引力定数
-double precision, parameter :: alpha = 12.d0 !vperpのlimit
+double precision, parameter :: cc_rate = 1.d0 !光速の割合
 
 !惑星のデータ
 double precision, parameter :: Mdp = 7.8d+22 !惑星の磁気双極子モーメント
@@ -152,7 +152,7 @@ BB = mu0*Mdp/4.d0/pi/(Lp*Rp)**3.d0 * sqrt(1.d0+3.d0*sin(lam)**2.d0) / cos(lam)**
 
 
 !断熱不変量
-call AI(N, Z, kind, alpha, Tperp, BB, ijn, mu)
+call AI(N, Z, kind, cc_rate, cc, mass, BB, ijn, mu)
 
 
 !/////以下iteration/////
@@ -273,30 +273,29 @@ end program pds_E_kai
 
 !subroutine & function
 
-!断熱不変量
-subroutine AI(N, Z, kind, alpha, Tperp, BB, ijn, mu)
- implicit none
- integer, intent(in) :: N, Z, kind
- double precision, intent(in) :: alpha
- double precision, dimension(kind), intent(in) :: Tperp
- double precision, dimension(N), intent(in) :: BB
- integer, dimension(kind), intent(in) :: ijn
- double precision, dimension(kind, Z), intent(out) :: mu
+subroutine AI(N, Z, kind, cc_rate, cc, mass, BB, ijn, mu)
+  implicit none
+  integer, intent(in) :: N, Z, kind
+  double precision, intent(in) :: cc_rate, cc
+  double precision, dimension(kind), intent(in) :: mass
+  double precision, dimension(N), intent(in) :: BB
+  integer, dimension(kind), intent(in) :: ijn
+  double precision, dimension(kind, Z), intent(out) :: mu
+  
+  integer :: j
+  
+  do j = 1, Z
+   if(j == 1) then
+     mu(:, j) = 0.d0
+    else if(j /= 1) then
+     mu(:, j) = 1.d-30*(mass*(cc_rate*cc)**2.d0/2.d0/BB(ijn)/1.d-30)**(dble(j-2)/dble(Z-2))
+   endif
+  enddo !j
+  
+  return
+  
+ end subroutine AI
  
- integer :: j
- 
- do j = 1, Z
-  if(j == 1) then
-    mu(:, j) = 0.d0
-   else if(j /= 1) then
-    mu(:, j) = 1.d-30*(alpha*Tperp/BB(ijn)/1.d-30)**(dble(j-2)/dble(Z-2))
-  endif
- enddo !j
- 
- return
- 
-end subroutine AI
-
 
 !静電ポテンシャル差分
 subroutine pepm(N, Phi, Phih)

@@ -16,6 +16,7 @@ double precision, parameter :: mu0 = 1.25663706143592d-06 !真空の透磁率
 double precision, parameter :: ep0 = 8.8541878128d-12 !真空の誘電率
 double precision, parameter :: GG = 6.6743015d-11 !万有引力定数
 double precision, parameter :: alpha = 12.d0 !vperpのlimit
+double precision, parameter :: cc_rate = 1.d0 !光速の割合
 
 !惑星のデータ
 double precision, parameter :: Mdp = 7.8d+22 !惑星の磁気双極子モーメント
@@ -32,7 +33,7 @@ double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !minファイルの導入
 integer, parameter :: kind = 12
-character(len=128) :: filemin = 'pds_E_kai_6_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_4_min.csv'
 double precision :: cvn !収束値
 double precision, dimension(N) :: lam !MLT
 double precision, dimension(N) :: ss !磁力線上の座標
@@ -88,7 +89,7 @@ double precision, dimension(N) :: ske !電子慣性長
 
 
 !保存ファイル
-character(len=128) :: fileall = 'pds_E_kai_6_all.csv'
+character(len=128) :: fileall = 'pds_E_kai_4_all.csv'
 !!lam(1), ss(2), BB(3), Phi(4), nd(5:kind+4), rhod(kind+5), rhop(kind+6), cvg(kind+7), VA(kind+8:kind+10),
 !!Vpara(kind+11:2*kind+10), Pperp(2*kind+11:3*kind+10), Ppara(3*kind+11:4*kind+10), PP(4*kind+11:5*kind+10),
 !!Pperpall(5*kind+11), Pparaall(5*kind+12), PPall(5*kind+13), Pperpalli(5*kind+14), Pparaalli(5*kind+15), PPalli(5*kind+16),
@@ -97,11 +98,11 @@ character(len=128) :: fileall = 'pds_E_kai_6_all.csv'
 !!border(5*kind+29), lari(5*kind+30), lare(5*kind+31), ski(5*kind+32), ske(5*kind+33)
 92 format(1PE25.15E3, 92(',', 1PE25.15E3)) !5*kind+33
 
-integer, parameter :: channel1 = 0 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: N1 = 200
+integer, parameter :: channel1 = 1 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
+integer, parameter :: N1 = 129
 integer, parameter :: channel2 = 0 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: Z2 = 300
-character(len=128) :: fileoption = 'pds_E_kai_6_disfun_'
+integer, parameter :: Z2 = 1
+character(len=128) :: fileoption = 'pds_E_kai_4_disfun_'
 
 
 !/////データ抽出/////
@@ -142,7 +143,7 @@ call AI(N, Z, kind, alpha, Tperp, BB, ijn, mu)
 call EP(N, kind, GG, Mp, mass, rr, omg, lam, Ms, rs, chr, Phi, UU)
 
 !Accessibility
-call access(N, Z, kind, alpha, Tpara, UU, mu, BB, ijn, amin, alim, amax)
+call access(N, Z, kind, cc_rate, cc, mass, UU, mu, BB, ijn, amin, alim, amax)
 
 !平均流速
 call ryusoku(N, Z, kind, UU, nd, mu, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, Vpara)
@@ -283,11 +284,11 @@ end subroutine EP
 
 
 !Accessibility
-subroutine access(N, Z, kind, alpha, Tpara, UU, mu, BB, ijn, amin, alim, amax)
+subroutine access(N, Z, kind, cc_rate, cc, mass, UU, mu, BB, ijn, amin, alim, amax)
  implicit none
  integer, intent(in) :: N, Z, kind
- double precision, intent(in) :: alpha
- double precision, dimension(kind), intent(in) :: Tpara
+ double precision, intent(in) :: cc_rate, cc
+ double precision, dimension(kind), intent(in) :: mass
  double precision, dimension(N, kind), intent(in) :: UU
  double precision, dimension(kind, Z), intent(in) :: mu
  double precision, dimension(N), intent(in) :: BB
@@ -296,7 +297,7 @@ subroutine access(N, Z, kind, alpha, Tpara, UU, mu, BB, ijn, amin, alim, amax)
  
  integer :: i, s, j, k, t
  double precision, dimension(N, kind, Z) :: EE !UU+mu*BB
- double precision :: CC
+ double precision :: WW
  
  
  !エネルギーの和(UU+mu*BB)
@@ -345,11 +346,7 @@ subroutine access(N, Z, kind, alpha, Tpara, UU, mu, BB, ijn, amin, alim, amax)
  do i = 1, N
   do s = 1, kind
    do j = 1, Z
-    if(sqrt(alpha*Tpara(s)) > amin(i, s, j)*1.d3) then
-      alim(i, s, j) = sqrt(alpha*Tpara(s))
-     else if(sqrt(alpha*Tpara(s)) <= amin(i, s, j)*1.d3) then
-      alim(i, s, j) = amin(i, s, j)*1.d3
-    endif
+    alim(i, s, j) = sqrt(EE(i, s, j)-EE(ijn(s), s, j)+mass(s)/2.d0*(cc_rate*cc)**2.d0)
    enddo !j
   enddo !s
  enddo !i
@@ -366,11 +363,11 @@ subroutine access(N, Z, kind, alpha, Tpara, UU, mu, BB, ijn, amin, alim, amax)
         do k = 1, i-1
          if(EE(k, s, j) > EE(t, s, j)) t = k
         enddo !k
-        CC = EE(t, s, j) - EE(ijn(s), s, j)
-        if(CC <= 0.d0) then
+        WW = EE(t, s, j) - EE(ijn(s), s, j)
+        if(WW <= 0.d0) then
           amax(i, s, j) = 0.d0
-         else if(CC > 0.d0) then
-          amax(i, s, j) = sqrt(CC)
+         else if(WW > 0.d0) then
+          amax(i, s, j) = sqrt(WW)
         endif
        enddo !j
      endif
@@ -384,11 +381,11 @@ subroutine access(N, Z, kind, alpha, Tpara, UU, mu, BB, ijn, amin, alim, amax)
         do k = i+1, N
          if(EE(k, s, j) > EE(t, s, j)) t = k
         enddo !k
-        CC = EE(t, s, j) - EE(ijn(s), s, j)
-        if(CC <= 0.d0) then
+        WW = EE(t, s, j) - EE(ijn(s), s, j)
+        if(WW <= 0.d0) then
           amax(i, s, j) = 0.d0
-         else if(CC > 0.d0) then
-          amax(i, s, j) = sqrt(CC)
+         else if(WW > 0.d0) then
+          amax(i, s, j) = sqrt(WW)
         endif
        enddo !j
      endif
@@ -451,39 +448,27 @@ subroutine ryusoku(N, Z, kind, UU, nd, mu, BB, mass, Tpara, Tperp, sig, amin, al
       check = 0 !amaxの積分をするかのチェック
       if(amin(i, s, j) == 0.d0) then
         aL(1) = 0.d0
-        if(alim(i, s, j) < sqrt(mass(s)/2.d0)*1.d-3) then
-          do p = 2, Z/2
-           aL(p) = ww * alim(i, s, j)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-          enddo !p
-         else if(alim(i, s, j) >= sqrt(mass(s)/2.d0)*1.d-3) then
-          do p = 2, Z/2
-           aL(p) = ww * sqrt(mass(s)/2.d0)*1.d-8*((alim(i, s, j)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-          enddo !p
-        endif
+        do p = 2, Z/2
+         aL(p) = ww * alim(i, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+        enddo !p
         if(amax(i, s, j) /= 0.d0) then
           check = 1 !amaxの積分を実行
           aM(1) = 0.d0
-          if(amax(i, s, j) < sqrt(mass(s)/2.d0)*1.d-3) then
-            do p = 2, Z/2
-             aM(p) = -ww * amax(i, s, j)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-            enddo !p
-           else if(amax(i, s, j) >= sqrt(mass(s)/2.d0)*1.d-3) then
-            do p = 2, Z/2
-             aM(p) = -ww * sqrt(mass(s)/2.d0)*1.d-8*((amax(i, s, j)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-            enddo !p
-          endif
+          do p = 2, Z/2
+           aM(p) = -ww * amax(i, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+          enddo !p
          else if(amax(i, s, j) == 0.d0) then
           aM = 0.d0
         endif
         
        else if(amin(i, s, j) /= 0.d0) then
         do p = 1, Z/2
-         aL(p) = ww * amin(i, s, j)*((alim(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z-1)))
+         aL(p) = ww * amin(i, s, j)*((alim(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z/2-1)))
         enddo !p
         if(amax(i, s, j) > amin(i, s, j)) then
           check = 1 !amaxの積分を実行
           do p = 1, Z/2
-           aM(p) = -ww * amin(i, s, j)*((amax(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z-1)))
+           aM(p) = -ww * amin(i, s, j)*((amax(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z/2-1)))
           enddo !p
          else if(amax(i, s, j) <= amin(i, s, j)) then
           aM = 0.d0
@@ -622,39 +607,27 @@ subroutine pressurepara(N, Z, kind, UU, Vpara, mu, BB, mass, Tpara, Tperp, sig, 
     check = 0 !amaxの積分をするかのチェック
     if(amin(i, s, j) == 0.d0) then
       aL(1) = 0.d0
-      if(alim(i, s, j) < sqrt(mass(s)/2.d0)*1.d-3) then
-        do p = 2, Z/2
-         aL(p) = ww * alim(i, s, j)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-        enddo !p
-       else if(alim(i, s, j) >= sqrt(mass(s)/2.d0)*1.d-3) then
-        do p = 2, Z/2
-         aL(p) = ww * sqrt(mass(s)/2.d0)*1.d-8*((alim(i, s, j)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-        enddo !p
-      endif
+      do p = 2, Z/2
+       aL(p) = ww * alim(i, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+      enddo !p
       if(amax(i, s, j) /= 0.d0) then
         check = 1 !amaxの積分を実行
         aM(1) = 0.d0
-        if(amax(i, s, j) < sqrt(mass(s)/2.d0)*1.d-3) then
-          do p = 2, Z/2
-           aM(p) = -ww * amax(i, s, j)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-          enddo !p
-         else if(amax(i, s, j) >= sqrt(mass(s)/2.d0)*1.d-3) then
-          do p = 2, Z/2
-           aM(p) = -ww * sqrt(mass(s)/2.d0)*1.d-8*((amax(i, s, j)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-          enddo !p
-        endif
+        do p = 2, Z/2
+         aM(p) = -ww * amax(i, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+        enddo !p
        else if(amax(i, s, j) == 0.d0) then
         aM = 0.d0
       endif
       
      else if(amin(i, s, j) /= 0.d0) then
       do p = 1, Z/2
-       aL(p) = ww * amin(i, s, j)*((alim(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z-1)))
+       aL(p) = ww * amin(i, s, j)*((alim(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z/2-1)))
       enddo !p
       if(amax(i, s, j) > amin(i, s, j)) then
         check = 1 !amaxの積分を実行
         do p = 1, Z/2
-         aM(p) = -ww * amin(i, s, j)*((amax(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z-1)))
+         aM(p) = -ww * amin(i, s, j)*((amax(i, s, j)/amin(i, s, j))**(dble(p-1)/dble(Z/2-1)))
         enddo !p
        else if(amax(i, s, j) <= amin(i, s, j)) then
         aM = 0.d0
@@ -833,39 +806,27 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
      check = 0 !amaxチェック
      if(amin(N1, s, j) == 0.d0) then
        aL(1) = 0.d0
-       if(alim(N1, s, j) < sqrt(mass(s)/2.d0)*1.d-3) then
-         do p = 2, Z/2
-          aL(p) = ww * alim(N1, s, j)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-         enddo !p
-        else if(alim(N1, s, j) >= sqrt(mass(s)/2.d0)*1.d-3) then
-         do p = 2, Z/2
-          aL(p) = ww * sqrt(mass(s)/2.d0)*1.d-8*((alim(N1, s, j)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-         enddo !p
-       endif
+       do p = 2, Z/2
+        aL(p) = ww * alim(N1, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+       enddo !p
        if(amax(N1, s, j) /= 0.d0) then
          check = 1 !amax実行
          aM(1) = 0.d0
-         if(amax(N1, s, j) < sqrt(mass(s)/2.d0)*1.d-3) then
-           do p = 2, Z/2
-            aM(p) = -ww * amax(N1, s, j)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-           enddo !p
-          else if(amax(N1, s, j) >= sqrt(mass(s)/2.d0)*1.d-3) then
-           do p = 2, Z/2
-            aM(p) = -ww * sqrt(mass(s)/2.d0)*1.d-8*((amax(N1, s, j)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-           enddo !p
-         endif
+         do p = 2, Z/2
+          aM(p) = -ww * amax(N1, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+         enddo !p
         else if(amax(N1, s, j) == 0.d0) then
          aM = 0.d0
        endif
        
       else if(amin(N1, s, j) /= 0.d0) then
        do p = 1, Z/2
-        aL(p) = ww * amin(N1, s, j)*((alim(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z-1)))
+        aL(p) = ww * amin(N1, s, j)*((alim(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z/2-1)))
        enddo !p
        if(amax(N1, s, j) > amin(N1, s, j)) then
          check = 1 !amaxの積分を実行
          do p = 1, Z/2
-          aM(p) = -ww * amin(N1, s, j)*((amax(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z-1)))
+          aM(p) = -ww * amin(N1, s, j)*((amax(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z/2-1)))
          enddo !p
         else if(amax(N1, s, j) <= amin(N1, s, j)) then
          aM = 0.d0
@@ -959,39 +920,27 @@ subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
    check = 0 !amaxチェック
    if(amin(i, s, Z2) == 0.d0) then
      aL(1) = 0.d0
-     if(alim(i, s, Z2) < sqrt(mass(s)/2.d0)*1.d-3) then
-       do p = 2, Z/2
-        aL(p) = ww * alim(i, s, Z2)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-       enddo !p
-      else if(alim(i, s, Z2) >= sqrt(mass(s)/2.d0)*1.d-3) then
-       do p = 2, Z/2
-        aL(p) = ww * sqrt(mass(s)/2.d0)*1.d-8*((alim(i, s, Z2)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-       enddo !p
-     endif
+     do p = 2, Z/2
+      aL(p) = ww * alim(i, s, Z2)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+     enddo !p
      if(amax(i, s, Z2) /= 0.d0) then
        check = 1 !amax実行
        aM(1) = 0.d0
-       if(amax(i, s, Z2) < sqrt(mass(s)/2.d0)*1.d-3) then
-         do p = 2, Z/2
-          aM(p) = -ww * amax(i, s, Z2)*1.d-5*(1.d5**(dble(p-2)/dble(Z/2-2)))
-         enddo !p
-        else if(amax(i, s, Z2) >= sqrt(mass(s)/2.d0)*1.d-3) then
-         do p = 2, Z/2
-          aM(p) = -ww * sqrt(mass(s)/2.d0)*1.d-8*((amax(i, s, Z2)/sqrt(mass(s)/2.d0)*1.d8)**(dble(p-2)/dble(Z/2-2)))
-         enddo !p
-       endif
+       do p = 2, Z/2
+        aM(p) = -ww * amax(i, s, Z2)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+       enddo !p
       else if(amax(i, s, Z2) == 0.d0) then
        aM = 0.d0
      endif
      
     else if(amin(i, s, Z2) /= 0.d0) then
      do p = 1, Z/2
-      aL(p) = ww * amin(i, s, Z2)*((alim(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z-1)))
+      aL(p) = ww * amin(i, s, Z2)*((alim(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z/2-1)))
      enddo !p
      if(amax(i, s, Z2) > amin(i, s, Z2)) then
        check = 1 !amaxの積分を実行
        do p = 1, Z/2
-        aM(p) = -ww * amin(i, s, Z2)*((amax(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z-1)))
+        aM(p) = -ww * amin(i, s, Z2)*((amax(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z/2-1)))
        enddo !p
       else if(amax(i, s, Z2) <= amin(i, s, Z2)) then
        aM = 0.d0

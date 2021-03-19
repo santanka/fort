@@ -8,7 +8,7 @@ Created on Wed Feb  3 21:36:01 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data1 = np.genfromtxt(r"C:\Users\mkroc\Desktop\fort-backup\pds_E_kai_2_disfun_s=12_mu=4.0794332027624548E-012.csv", delimiter=',', unpack=True)
+data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_4_disfun_s=12_mu=1.3720429664266644E-021.csv", delimiter=',', unpack=True)
 ss = data1[0][:]
 ss = np.rad2deg(ss)
 vperp = data1[2][:]

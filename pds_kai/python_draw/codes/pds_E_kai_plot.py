@@ -8,10 +8,10 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=15/pds_E_kai_L=15_3_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_4_all.csv", delimiter=',', unpack=True)
 
-channel = 6
-#1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長
+channel = 4
+#1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力
 
 if (channel == 1):
     x = data[0, :]
@@ -33,13 +33,13 @@ if (channel == 2):
     fig = plt.figure()
     plt.rcParams["font.size"] = 20
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Number Density [cm^-3]', yscale='log', ylim=(1.E-2, 1.E6))   
-    ax.plot(x, y[0, :]+y[5, :], c='orange', label='H+(ionosphere)')
-    ax.plot(x, y[1, :]+y[6, :], c='red', label='He+')
-    ax.plot(x, y[2, :]+y[7, :], c='purple', label='N+')
-    ax.plot(x, y[3, :]+y[8, :], c='green', label='O+')
-    ax.plot(x, y[4, :]+y[9, :], c='blue', label='e-(ionosphere)')
-    ax.plot(x, y[10, :], c='goldenrod', label='H+(magnetosphere)')
-    ax.plot(x, y[11, :], c='deepskyblue', label='e-(magnetosphere)')
+    ax.plot(x, y[0, :]+y[5, :], c='orange', label='H+(ionosphere)', linestyle='solid', linewidth='2')
+    ax.plot(x, y[1, :]+y[6, :], c='red', label='He+', linestyle='dashed', linewidth='2')
+    ax.plot(x, y[2, :]+y[7, :], c='purple', label='N+', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[3, :]+y[8, :], c='green', label='O+', linestyle='dotted', linewidth='2')
+    ax.plot(x, y[4, :]+y[9, :], c='blue', label='e-(ionosphere)', linestyle='dashdot', linewidth='2')
+    ax.plot(x, y[10, :], c='goldenrod', label='H+(magnetosphere)', linestyle='solid', linewidth='4')
+    ax.plot(x, y[11, :], c='deepskyblue', label='e-(magnetosphere)', linestyle='dashdot', linewidth='4')
     fig.suptitle('Number Density')
     ax.grid()
     ax.legend()
@@ -138,6 +138,24 @@ if (channel == 6):
     ax.grid()
     ax.legend()
 
+if (channel == 7):
+    x = data[0, :]
+    x = np.rad2deg(x)
+    y = data[46:58, :]*1.E9
+    fig = plt.figure()
+    plt.rcParams["font.size"] = 20
+    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log')   
+    ax.plot(x, y[0, :]+y[5, :], c='orange', label='H+(ionosphere)', linestyle='solid', linewidth='2')
+    ax.plot(x, y[1, :]+y[6, :], c='red', label='He+', linestyle='dashed', linewidth='2')
+    ax.plot(x, y[2, :]+y[7, :], c='purple', label='N+', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[3, :]+y[8, :], c='green', label='O+', linestyle='dotted', linewidth='2')
+    ax.plot(x, y[4, :]+y[9, :], c='blue', label='e-(ionosphere)', linestyle='dashdot', linewidth='2')
+    ax.plot(x, y[10, :], c='goldenrod', label='H+(magnetosphere)', linestyle='solid', linewidth='4')
+    ax.plot(x, y[11, :], c='deepskyblue', label='e-(magnetosphere)', linestyle='dashdot', linewidth='4')
+    ax.grid()
+    ax.legend()
+    
+    plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
 plt.tight_layout()
 plt.show()

@@ -284,121 +284,129 @@ end subroutine EP
 
 !Accessibility
 subroutine access(N, Z, kind, cc_rate, cc, mass, UU, mu, BB, ijn, amin, alim, amax)
- implicit none
- integer, intent(in) :: N, Z, kind
- double precision, intent(in) :: cc_rate, cc
- double precision, dimension(kind), intent(in) :: mass
- double precision, dimension(N, kind), intent(in) :: UU
- double precision, dimension(kind, Z), intent(in) :: mu
- double precision, dimension(N), intent(in) :: BB
- integer, dimension(kind), intent(in) :: ijn
- double precision, dimension(N, kind, Z), intent(out) :: amin, alim, amax
- 
- integer :: i, s, j, k, t
- double precision, dimension(N, kind, Z) :: EE !UU+mu*BB
- double precision :: WW
- 
- 
- !エネルギーの和(UU+mu*BB)
- do i = 1, N
-  do s = 1, kind
-   EE(i, s, :) = UU(i, s) + mu(s, :)*BB(i)
-  enddo !s
- enddo !i
- 
- !amin
- do s = 1, kind
+  implicit none
+  integer, intent(in) :: N, Z, kind
+  double precision, intent(in) :: cc_rate, cc
+  double precision, dimension(kind), intent(in) :: mass
+  double precision, dimension(N, kind), intent(in) :: UU
+  double precision, dimension(kind, Z), intent(in) :: mu
+  double precision, dimension(N), intent(in) :: BB
+  integer, dimension(kind), intent(in) :: ijn
+  double precision, dimension(N, kind, Z), intent(out) :: amin, alim, amax
+  
+  integer :: i, s, j, k, t
+  double precision, dimension(N, kind, Z) :: EE !UU+mu*BB
+  double precision :: WW
+  
+  
+  !エネルギーの和(UU+mu*BB)
   do i = 1, N
-   if(i < ijn(s)) then
-     do j = 1, Z
-      t = i+1
-      do k = i+1, ijn(s)
-       if(EE(k, s, j) > EE(t, s, j)) t = k
-      enddo !k
-      if(EE(i, s, j) > EE(t, s, j)) then
-        amin(i, s, j) = sqrt(EE(i, s, j) - EE(ijn(s), s, j))
-       else if(EE(i, s, j) <= EE(t, s, j)) then
-        amin(i, s, j) = sqrt(EE(t, s, j) - EE(ijn(s), s, j))
-      endif
-     enddo !j
-     
-    else if(i == ijn(s)) then
-     amin(ijn(s), s, :) = 0.d0
-     
-    else if(i > ijn(s)) then
-     do j = 1, Z
-      t = ijn(s)
-      do k = ijn(s), i-1
-       if(EE(k, s, j) > EE(t, s, j)) t = k
-      enddo !k
-      if(EE(i, s, j) > EE(t, s, j)) then
-        amin(i, s, j) = sqrt(EE(i, s, j) - EE(ijn(s), s, j))
-       else if(EE(i, s, j) <= EE(t, s, j)) then
-        amin(i, s, j) = sqrt(EE(t, s, j) - EE(ijn(s), s, j))
-      endif
-     enddo !j
-   endif
+   do s = 1, kind
+    EE(i, s, :) = UU(i, s) + mu(s, :)*BB(i)
+   enddo !s
   enddo !i
- enddo !s
- 
- !alim
- do i = 1, N
+  
+  !amin
   do s = 1, kind
-   do j = 1, Z
-    alim(i, s, j) = sqrt(EE(i, s, j)-EE(ijn(s), s, j)+mass(s)/2.d0*(cc_rate*cc)**2.d0)
-   enddo !j
+   do i = 1, N
+    if(i < ijn(s)) then
+      do j = 1, Z
+       t = i+1
+       do k = i+1, ijn(s)
+        if(EE(k, s, j) > EE(t, s, j)) t = k
+       enddo !k
+       if(EE(i, s, j) > EE(t, s, j)) then
+         amin(i, s, j) = sqrt(EE(i, s, j) - EE(ijn(s), s, j))
+        else if(EE(i, s, j) <= EE(t, s, j)) then
+         amin(i, s, j) = sqrt(EE(t, s, j) - EE(ijn(s), s, j))
+       endif
+      enddo !j
+      
+     else if(i == ijn(s)) then
+      amin(ijn(s), s, :) = 0.d0
+      
+     else if(i > ijn(s)) then
+      do j = 1, Z
+       t = ijn(s)
+       do k = ijn(s), i-1
+        if(EE(k, s, j) > EE(t, s, j)) t = k
+       enddo !k
+       if(EE(i, s, j) > EE(t, s, j)) then
+         amin(i, s, j) = sqrt(EE(i, s, j) - EE(ijn(s), s, j))
+        else if(EE(i, s, j) <= EE(t, s, j)) then
+         amin(i, s, j) = sqrt(EE(t, s, j) - EE(ijn(s), s, j))
+       endif
+      enddo !j
+    endif
+   enddo !i
   enddo !s
- enddo !i
- 
- !amax
- do s = 1, kind
+  
+  !alim
   do i = 1, N
-   if((i <= ijn(s) .and. ijn(s) == N) .or. (i < ijn(s) .and. ijn(s) /= N)) then
-     if(i == 1) then
-       amax(1, s, :) = 0.d0
-      else if(i /= 1) then
-       do j = 1, Z
-        t = 1
-        do k = 1, i-1
-         if(EE(k, s, j) > EE(t, s, j)) t = k
-        enddo !k
-        WW = EE(t, s, j) - EE(ijn(s), s, j)
-        if(WW <= 0.d0) then
-          amax(i, s, j) = 0.d0
-         else if(WW > 0.d0) then
-          amax(i, s, j) = sqrt(WW)
-        endif
-       enddo !j
+   do s = 1, kind
+    do j = 1, Z
+     if(EE(i, s, j) < EE(ijn(s), s, j)) then
+       alim(i, s, j) = sqrt(EE(i, s, j)-EE(ijn(s), s, j)+mass(s)/2.d0*(cc_rate*cc)**2.d0)
+      else if(EE(i, s, j) >= EE(ijn(s), s, j)) then
+       alim(i, s, j) = sqrt(mass(s)/2.d0*(cc_rate*cc)**2.d0)
      endif
-     
-    else if((i >= ijn(s) .and. ijn(s) == 1) .or. (i > ijn(s) .and. ijn(s) /= 1)) then
-     if(i == N) then
-       amax(N, s, :) = 0.d0
-      else if(i /= N) then
-       do j = 1, Z
-        t = i+1
-        do k = i+1, N
-         if(EE(k, s, j) > EE(t, s, j)) t = k
-        enddo !k
-        WW = EE(t, s, j) - EE(ijn(s), s, j)
-        if(WW <= 0.d0) then
-          amax(i, s, j) = 0.d0
-         else if(WW > 0.d0) then
-          amax(i, s, j) = sqrt(WW)
-        endif
-       enddo !j
-     endif
-     
-    else if(i == ijn(s) .and. ijn(s) /= 1 .and. ijn(s) /= N) then !例外処理
-     amax(i, s, :) = alim(i, s, :)
-     
-   endif
+    enddo !j
+   enddo !s
   enddo !i
- enddo !s
- 
- return
- 
-end subroutine access
+  
+  !amax
+  do s = 1, kind
+   do i = 1, N
+    if((i <= ijn(s) .and. ijn(s) == N) .or. (i < ijn(s) .and. ijn(s) /= N)) then
+      if(i == 1) then
+        amax(1, s, :) = 0.d0
+       else if(i /= 1) then
+        do j = 1, Z
+         t = 1
+         do k = 1, i-1
+          if(EE(k, s, j) > EE(t, s, j)) t = k
+         enddo !k
+         WW = EE(t, s, j) - EE(ijn(s), s, j)
+         if(WW <= 0.d0) then
+           amax(i, s, j) = 0.d0
+          else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+           amax(i, s, j) = sqrt(WW)
+          else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+           amax(i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
+         endif
+        enddo !j
+      endif
+      
+     else if((i >= ijn(s) .and. ijn(s) == 1) .or. (i > ijn(s) .and. ijn(s) /= 1)) then
+      if(i == N) then
+        amax(N, s, :) = 0.d0
+       else if(i /= N) then
+        do j = 1, Z
+         t = i+1
+         do k = i+1, N
+          if(EE(k, s, j) > EE(t, s, j)) t = k
+         enddo !k
+         WW = EE(t, s, j) - EE(ijn(s), s, j)
+         if(WW <= 0.d0) then
+           amax(i, s, j) = 0.d0
+          else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+           amax(i, s, j) = sqrt(WW)
+          else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+           amax(i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
+         endif
+        enddo !j
+      endif
+      
+     else if(i == ijn(s) .and. ijn(s) /= 1 .and. ijn(s) /= N) then !例外処理
+      amax(i, s, :) = alim(i, s, :)
+      
+    endif
+   enddo !i
+  enddo !s
+  
+  return
+  
+ end subroutine access
 
 
 !平均流速

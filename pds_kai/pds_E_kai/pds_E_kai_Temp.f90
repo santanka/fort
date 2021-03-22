@@ -346,7 +346,11 @@ subroutine access(N, Z, kind, cc_rate, cc, mass, UU, mu, BB, ijn, amin, alim, am
  do i = 1, N
   do s = 1, kind
    do j = 1, Z
-    alim(i, s, j) = sqrt(EE(i, s, j)-EE(ijn(s), s, j)+mass(s)/2.d0*(cc_rate*cc)**2.d0)
+    if(EE(i, s, j) < EE(ijn(s), s, j)) then
+      alim(i, s, j) = sqrt(EE(i, s, j)-EE(ijn(s), s, j)+mass(s)/2.d0*(cc_rate*cc)**2.d0)
+     else if(EE(i, s, j) >= EE(ijn(s), s, j)) then
+      alim(i, s, j) = sqrt(mass(s)/2.d0*(cc_rate*cc)**2.d0)
+    endif
    enddo !j
   enddo !s
  enddo !i
@@ -366,8 +370,10 @@ subroutine access(N, Z, kind, cc_rate, cc, mass, UU, mu, BB, ijn, amin, alim, am
         WW = EE(t, s, j) - EE(ijn(s), s, j)
         if(WW <= 0.d0) then
           amax(i, s, j) = 0.d0
-         else if(WW > 0.d0) then
+         else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
           amax(i, s, j) = sqrt(WW)
+         else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+          amax(i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
         endif
        enddo !j
      endif

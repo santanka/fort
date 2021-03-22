@@ -173,7 +173,7 @@ do !itn
  call EP(N, kind, GG, Mp, mass, rr, omg, lam, Ms, rs, chr, Phih, UU)
  
  !Accessibility
- call access(N, Z, kind, UU, mu, BB, ijn, amin, amax)
+ call access(N, Z, kind, cc, cc_rate, mass, UU, mu, BB, ijn, amin, amax)
  
  !êœï™
  call dense(N, Z, kind, Tperp, Tpara, sigg, mu, BB, ijn, amin, amax, nd)
@@ -363,9 +363,11 @@ end subroutine EP
 
 
 !Accessibility
-subroutine access(N, Z, kind, UU, mu, BB, ijn, amin, amax)
+subroutine access(N, Z, kind, cc, cc_rate, mass, UU, mu, BB, ijn, amin, amax)
  implicit none
  integer, intent(in) :: N, Z, kind
+ double precision, intent(in) :: cc, cc_rate
+ double precision, dimension(kind), intent(in) :: mass
  double precision, dimension(3, N, kind), intent(in) :: UU
  double precision, dimension(kind, Z), intent(in) :: mu
  double precision, dimension(N), intent(in) :: BB
@@ -374,7 +376,7 @@ subroutine access(N, Z, kind, UU, mu, BB, ijn, amin, amax)
  
  integer :: h, i, s, j, k, t
  double precision, dimension(3, N, kind, Z) :: EE !UU+mu*BB
- double precision :: CC
+ double precision :: WW
  
  
  !ÉGÉlÉãÉMÅ[ÇÃòa(UU+mu*BB)
@@ -439,19 +441,23 @@ subroutine access(N, Z, kind, UU, mu, BB, ijn, amin, amax)
         enddo !k
         if(i == ijn(s) .and. ijn(s) == N) then
           do h = 1, 3
-           CC = EE(1, t, s, j) - EE(h, ijn(s), s, j)
-           if(CC <= 0.d0) then
+           WW = EE(1, t, s, j) - EE(h, ijn(s), s, j)
+           if(WW <= 0.d0) then
              amax(h, i, s, j) = 0.d0
-            else if(CC > 0.d0) then
-             amax(h, i, s, j) = sqrt(CC)
+            else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+             amax(h, i, s, j) = sqrt(WW)
+            else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+             amax(h, i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
            endif
           enddo !h
          else
-          CC = EE(1, t, s, j) - EE(1, ijn(s), s, j)
-          if(CC <= 0.d0) then
+          WW = EE(1, t, s, j) - EE(1, ijn(s), s, j)
+          if(WW <= 0.d0) then
             amax(:, i, s, j) = 0.d0
-           else if(CC > 0.d0) then
-            amax(:, i, s, j) = sqrt(CC)
+           else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+            amax(:, i, s, j) = sqrt(WW)
+           else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+            amax(:, i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
           endif
         endif
        enddo !j
@@ -468,19 +474,23 @@ subroutine access(N, Z, kind, UU, mu, BB, ijn, amin, amax)
         enddo !k
         if(i == ijn(s) .and. ijn(s) == 1) then
           do h = 1, 3
-           CC = EE(1, t, s, j) - EE(h, ijn(s), s, j)
-           if(CC <= 0.d0) then
+           WW = EE(1, t, s, j) - EE(h, ijn(s), s, j)
+           if(WW <= 0.d0) then
              amax(h, i, s, j) = 0.d0
-            else if(CC > 0.d0) then
-             amax(h, i, s, j) = sqrt(CC)
+            else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+             amax(h, i, s, j) = sqrt(WW)
+            else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+             amax(h, i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
            endif
           enddo !h
          else
-          CC = EE(1, t, s, j) - EE(1, ijn(s), s, j)
-          if(CC <= 0.d0) then
+          WW = EE(1, t, s, j) - EE(1, ijn(s), s, j)
+          if(WW <= 0.d0) then
             amax(:, i, s, j) = 0.d0
-           else if(CC > 0.d0) then
-            amax(:, i, s, j) = sqrt(CC)
+           else if(WW > 0.d0 .and. WW < mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+            amax(:, i, s, j) = sqrt(WW)
+           else if(WW >= mass(s)/2.d0*(cc_rate*cc)**2.d0) then
+            amax(:, i, s, j) = sqrt(mass(s)/2.d0)*cc_rate*cc
           endif
         endif
        enddo !j

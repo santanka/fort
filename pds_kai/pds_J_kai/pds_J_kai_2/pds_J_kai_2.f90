@@ -10,7 +10,7 @@ integer :: trigger !finishコマンド(0:off, 1:on)
 integer, parameter :: N = 233 !grid数
 integer, parameter :: Z = 300 !perp速度grid数
 integer, parameter :: MV_fix = 117 !極小値となる座標
-integer, parameter :: CP = 117 !boundary以外の静電ポテンシャル無変化点
+integer, parameter :: CP = 0 !boundary以外の静電ポテンシャル無変化点
 double precision, parameter :: pi = 4.d0*atan(1.d0) !円周率
 character(len=80) :: dummy !読まない文字用
 
@@ -36,7 +36,7 @@ double precision, parameter :: Ms = 8.931938d22 !衛星の質量
 double precision, parameter :: Ls = 5.89856d0 !衛星軌道のL値
 
 !Boundary Condition(粒子のデータ)
-character(len=128) :: fileBC = 'pds_BC_J_kai_1.csv'
+character(len=128) :: fileBC = 'pds_BC_J_kai_2.csv'
 integer, parameter :: kind = 10 !粒子種数
 integer, parameter :: nsc = 1 !boundary:Nでの数密度調整をする粒子
 integer, parameter :: ssc = 3 !boundary:Sでの数密度調整をする粒子
@@ -48,7 +48,7 @@ double precision, dimension(kind) :: mass !質量
 integer, dimension(kind) :: ijn !injection number
 
 !Initial Condition(初期静電ポテンシャル分布)
-character(len=128) :: fileIC = 'pds_IC_J_kai_1.csv'
+character(len=128) :: fileIC = 'pds_IC_J_kai_2.csv'
 double precision, dimension(N) :: Phi !静電ポテンシャル分布
 
 !場の設定
@@ -79,12 +79,12 @@ double precision :: cvn !収束値
 double precision :: DDD !最低収束値
 double precision, dimension(N) :: nPhi !静電ポテンシャル更新値
 double precision, dimension(kind) :: nsig !数密度更新値
-double precision, dimension(115) :: cvn_min !収束値データ(2~(N+1)/2-1)
+double precision, dimension(116) :: cvn_min !収束値データ(2~(N+1)/2)
 
 
 
 !保存ファイル名
-character(len=128) :: filetop = 'pds_J_kai_1_'
+character(len=128) :: filetop = 'pds_J_kai_2_'
 character(len=128) :: fileresult = '_result.csv'
 72 format(1PE25.15E3, 16(',', 1PE25.15E3)) !kind+7
 character(len=128) :: filepote = '_potential.csv'
@@ -93,7 +93,7 @@ character(len=128) :: filemin = '_min.csv'
 92 format(1PE25.15E3) !1
 character(len=128) :: filecheck = '_check.csv'
 character(len=128) :: fileresult_MV, filepote_MV, filemin_MV, filecheck_MV, file_MV
-character(len=128) :: file_cvn = 'pds_J_kai_1_cvn.csv'
+character(len=128) :: file_cvn = 'pds_J_kai_2_cvn.csv'
 62 format(1PE25.15E3, 3(',', 1PE25.15E3)) !4(double precision)
 52 format(1PE25.15E3, 4(',', 1PE25.15E3)) !5(double precision)
 42 format(I5)
@@ -139,7 +139,7 @@ BB = mu0*Mdp/4.d0/pi/(Lp*Rp)**3.d0 * sqrt(1.d0+3.d0*sin(lam)**2.d0) / cos(lam)**
 
 itn_all = 0
 
-do MV_itn = 2, (N+1)/2-1
+do MV_itn = 2, (N+1)/2
  MV_S = MV_itn
  MV_N = N - MV_itn + 1
  fin_num = 0
@@ -293,10 +293,10 @@ do MV_itn = 2, (N+1)/2-1
  cvn_min(MV_itn-1) = DDD
  
  !収束値データ化
- if(MV_itn == (N+1)/2-1) then
+ if(MV_itn == (N+1)/2) then
    open(80, file = file_cvn)
-   do i = 2, (N+1)/2-1 !MV_itnの範囲
-    write(80, 62) lam(i), ss(i), BB(i), cvn_min(i-1)
+   do i = 2, (N+1)/2 !MV_itnの範囲
+    write(80, 62) lam((N+1)/2+i-2), ss((N+1)/2+i-2), BB((N+1)/2+i-2), cvn_min((N+1)/2-i+1)
    enddo !i
    close(80)
   endif

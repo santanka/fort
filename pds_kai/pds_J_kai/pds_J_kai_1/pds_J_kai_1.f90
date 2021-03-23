@@ -79,6 +79,7 @@ double precision :: cvn !収束値
 double precision :: DDD !最低収束値
 double precision, dimension(N) :: nPhi !静電ポテンシャル更新値
 double precision, dimension(kind) :: nsig !数密度更新値
+double precision, dimension(115) :: cvn_min !収束値データ(2~(N+1)/2-1)
 
 
 
@@ -92,6 +93,8 @@ character(len=128) :: filemin = '_min.csv'
 92 format(1PE25.15E3) !1
 character(len=128) :: filecheck = '_check.csv'
 character(len=128) :: fileresult_MV, filepote_MV, filemin_MV, filecheck_MV, file_MV
+character(len=128) :: file_cvn = 'pds_J_kai_1_cvn.csv'
+62 format(1PE25.15E3, 3(',', 1PE25.15E3)) !4(double precision)
 52 format(1PE25.15E3, 4(',', 1PE25.15E3)) !5(double precision)
 42 format(I5)
 32 format(1PE25.15E3, 7(',', 1PE25.15E3)) !8(double precision)
@@ -286,7 +289,18 @@ do MV_itn = 2, (N+1)/2-1
   
   
  enddo !itn
+
+ cvn_min(MV_itn-1) = DDD
  
+ !収束値データ化
+ if(MV_itn == (N+1)/2-1) then
+   open(80, file = file_cvn)
+   do i = 2, (N+1)/2-1 !MV_itnの範囲
+    write(80, 62) lam(i), ss(i), BB(i), cvn_min(i-1)
+   enddo !i
+   close(80)
+  endif
+
 enddo !MV_itn
 
 end program pds_J_kai

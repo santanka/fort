@@ -774,8 +774,6 @@ subroutine NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
     enddo
   endif
  enddo !mm
-
- nPhi(CP) = Phih(1, CP)
  
  return
  

@@ -10,7 +10,7 @@ integer :: trigger !finishコマンド(0:off, 1:on)
 integer, parameter :: N = 233 !grid数
 integer, parameter :: Z = 300 !perp速度grid数
 integer, parameter :: MV_fix = 117 !極小値となる座標
-integer, parameter :: CP = 0 !boundary以外の静電ポテンシャル無変化点
+integer, parameter :: CP =  -1 !boundary以外の静電ポテンシャル無変化点
 double precision, parameter :: pi = 4.d0*atan(1.d0) !円周率
 character(len=80) :: dummy !読まない文字用
 
@@ -740,7 +740,7 @@ subroutine NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
       do i = MV_min, MV-1
        if(nPhi(i) < nPhi(i+1) .and. (i /= CP .and. i+1 /= CP)) then
          if(search == 0) search = 1
-         if(i == MV_min) then
+         if(i == MV_min .and. MV_min == 1) then
            nPhi(i+1) = 2.d0*nPhi(i)-nPhi(i+1)
           else
            ser = nPhi(i)
@@ -761,7 +761,7 @@ subroutine NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
       do i = MV, MV_max-1
        if(nPhi(i+1) < nPhi(i) .and. (i /= CP .and. i+1 /= CP)) then
          if(search == 0) search = 1
-         if(i == MV_max-1) then
+         if(i == MV_max-1 .and. MV_max == N) then
            nPhi(i) = 2.d0*nPhi(i+1)-nPhi(i)
           else
            ser = nPhi(i)

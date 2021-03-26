@@ -207,7 +207,7 @@ do MV_itn = 31, (N+1)/2-1
   
   !収束値
   call CV(N, rhod, rhodp, rhodm, rhop, cvg, cvn)
-  print *, itn_all, MV_itn, itn, fin_num, cvn
+  if(mod(itn_all, 10) == 1) print *, itn_all, MV_itn, itn, fin_num, cvn
   
   !ファイル化処理
   !open(50, file = fileresult_MV)
@@ -226,7 +226,7 @@ do MV_itn = 31, (N+1)/2-1
   if(DDD > cvn .or. DDD == 0.d0) then
     DDD = cvn
     fin_num = 0
-    print *, "cvn min", DDD
+    if(mod(itn_all, 10) == 1) print *, "cvn min", DDD
     open(33, file = filemin_MV)
     write(33, 92) cvn
     do i = 1, N
@@ -729,14 +729,14 @@ subroutine NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
         CC = ((Phih(3, i)-Phih(1, i))/(cvg(3, i)-cvg(1, i)) + (Phih(2, i)-Phih(1, i))/(cvg(2, i)-cvg(1, i)))/2.d0*cvg(1, i)
       endif
     endif
-    if(abs(CC) < cvg(1, i) .and. cvg(1, i) <= 1.d0) then
+    if(abs(CC) < cvg(1, i) .and. cvg(1, i) <= 5.d0) then
       nPhi(i) = Phih(1, i) - CC
-     else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 1.d0) then
+     else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 5.d0) then
       nPhi(i) = Phih(1, i) - CC/abs(CC)*cvg(1, i)
-     else if(abs(CC) < 1.d0 .and. cvg(1, i) > 1.d0) then
+     else if(abs(CC) < 5.d0 .and. cvg(1, i) > 5.d0) then
       nPhi(i) = Phih(1, i) - CC
-     else if(abs(CC) >= 1.d0 .and. cvg(1, i) > 1.d0) then
-      nPhi(i) = Phih(1, i) - CC/abs(CC)*1.d0
+     else if(abs(CC) >= 5.d0 .and. cvg(1, i) > 5.d0) then
+      nPhi(i) = Phih(1, i) - CC/abs(CC)*5.d0
     endif
   endif
  enddo !i

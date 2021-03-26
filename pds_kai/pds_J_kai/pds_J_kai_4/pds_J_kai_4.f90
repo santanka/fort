@@ -5,7 +5,8 @@ implicit none
 !mainの文字
 integer :: h, i, j, s, itn, itn_all !do文用
 integer :: MV_itn !極小値ローラー作戦
-integer :: fin_num !100回更新なしでfinish
+integer :: fin_num !50回更新なしでfinish
+integer :: update_quantity !更新量によってはfinishに向かう
 integer :: trigger !finishコマンド(0:off, 1:on)
 integer, parameter :: N = 233 !grid数
 integer, parameter :: Z = 300 !perp速度grid数
@@ -242,12 +243,6 @@ do MV_itn = 31, (N+1)/2-1
     fin_num = fin_num + 1
   endif
   
-  !収束チェック
-  if(fin_num >= 50) then
-    print *, "finish"
-    trigger = 1
-  endif
-  
   !Newton法(静電ポテンシャル)
   call NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
   
@@ -286,6 +281,24 @@ do MV_itn = 31, (N+1)/2-1
    endif
   enddo !i
   
+  !更新量チェック
+  update_quantity = 0
+  if(DDD > cvn .or. DDD == 0.d0) then
+    do i = 1, N
+      if(abs(nPhi(i)-Phih(1, i)) > abs(Phih(1, i))*1.d-7 .and. update_quantity == 0) then
+        update_quantity = 1
+      endif
+    enddo !i
+    
+    if(update_quantity == 0) fin_num = fin_num + 1
+  endif
+
+  !収束チェック
+  if(fin_num >= 50) then
+    print *, "finish"
+    trigger = 1
+  endif
+
   if(trigger == 1) exit
 
   !更新
@@ -716,14 +729,14 @@ subroutine NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
         CC = ((Phih(3, i)-Phih(1, i))/(cvg(3, i)-cvg(1, i)) + (Phih(2, i)-Phih(1, i))/(cvg(2, i)-cvg(1, i)))/2.d0*cvg(1, i)
       endif
     endif
-    if(abs(CC) < cvg(1, i) .and. cvg(1, i) <= 5.d-1) then
+    if(abs(CC) < cvg(1, i) .and. cvg(1, i) <= 1.d0) then
       nPhi(i) = Phih(1, i) - CC
-     else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 5.d-1) then
+     else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 1.d0) then
       nPhi(i) = Phih(1, i) - CC/abs(CC)*cvg(1, i)
-     else if(abs(CC) < 5.d-1 .and. cvg(1, i) > 5.d-1) then
+     else if(abs(CC) < 1.d0 .and. cvg(1, i) > 1.d0) then
       nPhi(i) = Phih(1, i) - CC
-     else if(abs(CC) >= 5.d-1 .and. cvg(1, i) > 5.d-1) then
-      nPhi(i) = Phih(1, i) - CC/abs(CC)*5.d-1
+     else if(abs(CC) >= 1.d0 .and. cvg(1, i) > 1.d0) then
+      nPhi(i) = Phih(1, i) - CC/abs(CC)*1.d0
     endif
   endif
  enddo !i

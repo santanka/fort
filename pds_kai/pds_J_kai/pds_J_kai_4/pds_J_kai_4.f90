@@ -207,7 +207,7 @@ do MV_itn = 31, (N+1)/2-1
   
   !収束値
   call CV(N, rhod, rhodp, rhodm, rhop, cvg, cvn)
-  if(mod(itn_all, 10) == 1) print *, itn_all, MV_itn, itn, fin_num, cvn
+  if(mod(itn_all, 500) == 1) print *, itn_all, MV_itn, itn, fin_num, cvn
   
   !ファイル化処理
   !open(50, file = fileresult_MV)
@@ -226,7 +226,7 @@ do MV_itn = 31, (N+1)/2-1
   if(DDD > cvn .or. DDD == 0.d0) then
     DDD = cvn
     fin_num = 0
-    if(mod(itn_all, 10) == 1) print *, "cvn min", DDD
+    if(mod(itn_all, 500) == 1) print *, "cvn min", DDD
     open(33, file = filemin_MV)
     write(33, 92) cvn
     do i = 1, N
@@ -295,11 +295,13 @@ do MV_itn = 31, (N+1)/2-1
 
   !収束チェック
   if(fin_num >= 50) then
-    print *, "finish"
     trigger = 1
   endif
 
-  if(trigger == 1) exit
+  if(trigger == 1) then
+    print *, 'finish', itn_all, MV_itn, itn, fin_num, DDD
+    exit
+  endif
 
   !更新
   Phi = nPhi

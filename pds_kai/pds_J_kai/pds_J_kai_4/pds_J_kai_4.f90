@@ -316,7 +316,7 @@ do MV_itn = 31, (N+1)/2-1
  if(MV_itn == (N+1)/2-1) then
    open(80, file = file_cvn)
    do i = 31, (N+1)/2-1 !MV_itn‚Ì”ÍˆÍ
-    write(80, 62) lam((N+1)/2+i-1), ss((N+1)/2+i-1), BB((N+1)/2+i-1), cvn_min((N+1)/2-i)
+    write(80, 62) lam((N+1)/2+i-1), ss((N+1)/2+i-1), BB((N+1)/2+i-1), cvn_min((N+1)/2-i) !’²®•K{
    enddo !i
    close(80)
   endif

@@ -4,8 +4,8 @@ implicit none
 
 !mainの文字
 integer :: i, s, j !do文用
-integer, parameter :: N = 999 !grid数
-integer, parameter :: Z = 500 !速度空間grid数
+integer, parameter :: N = 233 !grid数
+integer, parameter :: Z = 300 !速度空間grid数
 double precision, parameter :: pi = 4.d0*atan(1.d0) !円周率
 character(len=80) :: dummy !使用しない文字用
 
@@ -23,17 +23,17 @@ double precision, parameter :: Mdp = 1.16d+27 !惑星の磁気双極子モーメント
 double precision, parameter :: Mp = 1.8982d+27 !惑星の質量
 double precision, parameter :: Rp = 7.1492d+07 !惑星の半径
 double precision, parameter :: omg = 1.75851813802955d-04 !惑星の自転角周波数
-double precision, parameter :: Lp = 5.85d0 !対象の磁力線のL値
+double precision, parameter :: Lp = 5.84760d0 !対象の磁力線のL値
 double precision, parameter :: lamN = acos(sqrt((1.d0+5.d5/Rp)/Lp)) !boundary:NのMLT
 double precision, parameter :: lamS = -acos(sqrt((1.d0+5.d5/Rp)/Lp)) !boundary:SのMLT
 
 !衛星のデータ(設定しない場合は値を0に)
 double precision, parameter :: Ms = 8.931938d22 !衛星の質量
-double precision, parameter :: Ls = 5.9d0 !衛星軌道のL値
+double precision, parameter :: Ls = 5.89856d0 !衛星軌道のL値
 
 !minファイルの導入
 integer, parameter :: kind = 10
-character(len=128) :: filemin = 'pds_J_kai_3_min.csv'
+character(len=128) :: filemin = 'pds_J_kai_4_MVN=0.55715313984661163_min.csv'
 double precision :: cvn !収束値
 double precision, dimension(N) :: lam !MLT
 double precision, dimension(N) :: ss !磁力線上の座標
@@ -89,7 +89,7 @@ double precision, dimension(N) :: ske !電子慣性長
 
 
 !保存ファイル
-character(len=128) :: fileall = 'pds_J_kai_3_all.csv'
+character(len=128) :: fileall = 'pds_J_kai_4_MVN=0.55715313984661163_all.csv'
 !!lam(1), ss(2), BB(3), Phi(4), nd(5:kind+4), rhod(kind+5), rhop(kind+6), cvg(kind+7), VA(kind+8:kind+10),
 !!Vpara(kind+11:2*kind+10), Pperp(2*kind+11:3*kind+10), Ppara(3*kind+11:4*kind+10), PP(4*kind+11:5*kind+10),
 !!Pperpall(5*kind+11), Pparaall(5*kind+12), PPall(5*kind+13), Pperpalli(5*kind+14), Pparaalli(5*kind+15), PPalli(5*kind+16),
@@ -98,11 +98,11 @@ character(len=128) :: fileall = 'pds_J_kai_3_all.csv'
 !!border(5*kind+29), lari(5*kind+30), lare(5*kind+31), ski(5*kind+32), ske(5*kind+33)
 92 format(1PE25.15E3, 82(',', 1PE25.15E3)) !5*kind+33
 
-integer, parameter :: channel1 = 0 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: N1 = 129
-integer, parameter :: channel2 = 0 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: Z2 = 1
-character(len=128) :: fileoption = 'pds_E_kai_3_disfun_'
+integer, parameter :: channel1 = 1 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
+integer, parameter :: N1 = 204
+integer, parameter :: channel2 = 1 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
+integer, parameter :: Z2 = 200
+character(len=128) :: fileoption = 'pds_E_kai_4_MVN=0.55715313984661163_disfun_'
 
 
 !/////データ抽出/////
@@ -443,7 +443,7 @@ subroutine ryusoku(N, Z, kind, UU, nd, mu, BB, mass, Tpara, Tperp, sig, amin, al
  
  do i = 1, N
   do s = 1, kind
-   if(nd(i, s) == 0.d0) then
+   if(nd(i, s) <= 1.d-10) then
      Vpara(i, s) = sqrt(a) !NaNを代入
     else if(nd(i, s) /= 0.d0) then
      TH = 0.d0

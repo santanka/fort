@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_4/pds_J_kai_4_MVN=0.55715313984661163_all.csv", delimiter=',', unpack=True)
 
-channel = 7
+channel = 1
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力
 
 if (channel == 1):

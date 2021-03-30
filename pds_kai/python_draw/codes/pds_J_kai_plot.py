@@ -8,22 +8,28 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_4/pds_J_kai_4_MVN=0.55715313984661163_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_4_cvnminpoint/pds_J_kai_4_cvnminpoint_all.csv", delimiter=',', unpack=True)
 
-channel = 1
+channel = 2
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力
 
 if (channel == 1):
     x = data[0, :]
     x = np.rad2deg(x)
     y = data[3, :]
-    fig = plt.figure()
-    plt.rcParams["font.size"] = 20
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Electrostatic Potential [V]')    
-    ax.plot(x, y)
-    fig.suptitle('Electrostatic Potential')
-    ax.grid()
-    
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+    ax1.set_ylabel('Electrostatic Potential [kV]', fontsize=25)
+    ax1.plot(x, y/1E3)
+    ax1.grid()
+    ax1.tick_params(labelsize=25)
+    ax2.set_xlabel('S← MLT [degree] →N', fontsize=25)
+    ax2.set_ylabel('Electrostatic Potential [V]', fontsize=25)
+    ax2.plot(x, y)
+    ax2.set_ylim(-15, 50)
+    ax2.grid()
+    ax2.tick_params(labelsize=25)
+    fig.suptitle('Electrostatic Potential', fontsize=25)
+    plt.rcParams["font.size"] = 25
 
 
 if (channel == 2):
@@ -31,16 +37,17 @@ if (channel == 2):
     x = np.rad2deg(x)
     y = data[4:14, :]*1.E-6
     fig = plt.figure()
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Number Density [cm^-3]', yscale='log', ylim=(1.E-2, 1.E5))   
-    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(ionosphere)', linestyle='solid', linewidth='2')
-    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(ionosphere)', linestyle='dashdot', linewidth='2')
-    ax.plot(x, y[4, :], c='red', label='H+', linestyle='solid', linewidth='4')
-    ax.plot(x, y[5, :], c='deepskyblue', label='O+', linestyle='dotted', linewidth='2')
-    ax.plot(x, y[6, :], c='green', label='S+', linestyle='dotted', linewidth='4')
-    ax.plot(x, y[7, :], c='lime', label='S2+', linestyle='solid', linewidth='5')
-    ax.plot(x, y[8, :], c='blue', label='cold e-(magnetosphere)', linestyle='dashdot', linewidth='4')
-    ax.plot(x, y[9, :], c='hotpink', label='hot e-(magnetosphere)', linestyle='dashdot', linewidth='5')
+    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
+    ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[5, :], c='deepskyblue', label='O+(Io)', linestyle='dotted', linewidth='3')
+    ax.plot(x, y[6, :], c='green', label='S+(Io)', linestyle='dotted', linewidth='3')
+    ax.plot(x, y[7, :], c='lime', label='S2+(Io)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[8, :], c='blue', label='cold e-(Io)', linestyle='dashdot', linewidth='3')
+    ax.plot(x, y[9, :], c='hotpink', label='hot e-(Io)', linestyle='dashdot', linewidth='3')
+    ax.tick_params(labelsize=25)
     fig.suptitle('Number Density')
     ax.grid()
     ax.legend()
@@ -50,12 +57,20 @@ if (channel == 3):
     x = data[0, :]
     x = np.rad2deg(x)
     y = data[19, :]
-    fig = plt.figure()
-    plt.rcParams["font.size"] = 20
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Alfven Speed [/(Light Speed)]')
-    ax.plot(x, y)
-    fig.suptitle('Alfven Speed')
-    ax.grid()
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+    ax1.set_ylabel('Alfven Speed (VA) [/(Light Speed (c))]', fontsize=25)
+    ax1.plot(x, y)
+    ax1.set_yscale('log')
+    ax1.grid()
+    ax1.tick_params(labelsize=25)
+    ax2.set_xlabel('S← MLT [degree] →N', fontsize=25)
+    ax2.set_ylabel('1 - VA/c', fontsize=25)
+    ax2.plot(x, 1-y)
+    ax2.set_yscale('log')
+    ax2.grid()
+    ax2.tick_params(labelsize=25)
+    fig.suptitle('Alfven Speed', fontsize=25)
+    plt.rcParams["font.size"] = 25
     
 
 if (channel == 4):
@@ -63,7 +78,7 @@ if (channel == 4):
     x = np.rad2deg(x)
     y = data[60:69]*1.E9
     fig = plt.figure()
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 25
     ax1 = fig.add_subplot(131, title='perpendicular')
     ax1.set_xlabel('S← MLT [degree] →N')
     ax1.set_ylabel('Pressure [nPa]')
@@ -73,6 +88,7 @@ if (channel == 4):
     ax1.plot(x, y[6, :], c='blue', label='electron')
     ax1.grid()
     ax1.legend()
+    ax1.tick_params(labelsize=25)
     ax2 = fig.add_subplot(132, title='parallel')
     ax2.set_xlabel('S← MLT [degree] →N')
     ax2.set_ylabel('Pressure [nPa]')
@@ -82,6 +98,7 @@ if (channel == 4):
     ax2.plot(x, y[7, :], c='blue', label='electron')
     ax2.grid()
     ax2.legend()
+    ax2.tick_params(labelsize=25)
     ax3 = fig.add_subplot(133, title='all')
     ax3.set_xlabel('S← MLT [degree] →N')
     ax3.set_ylabel('Pressure [nPa]')
@@ -91,6 +108,7 @@ if (channel == 4):
     ax3.plot(x, y[8, :], c='blue', label='electron')
     ax3.grid()
     ax3.legend()
+    ax3.tick_params(labelsize=25)
     
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
@@ -100,13 +118,14 @@ if (channel == 5):
     y = data[72, :]
     z = data[78, :]
     fig = plt.figure()
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='beta', yscale='log')
     ax.plot(x, y, c='orange', label='beta')
     ax.plot(x, z, c='dimgrey', label='me/mi', linestyle='-.')
     fig.suptitle('beta(ion, perpendicular)')
     ax.grid()
     ax.legend()
+    ax.tick_params(labelsize=25)
     
 
 if (channel == 6):
@@ -125,7 +144,7 @@ if (channel == 6):
         for j in range(4):
             elr[j, i] = 1./cc/ee/BB[i]*np.sqrt(Ke[j]*(me*cc*cc+Ke[j]))
     fig = plt.figure()
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='length [m]', yscale='log')   
     ax.plot(x, y[0, :], c='orange', label='ion Larmor radius - KAW')
     #ax.plot(x, y[1, :], c='deepskyblue', label='electron Larmor radius')
@@ -138,6 +157,7 @@ if (channel == 6):
     fig.suptitle('Larmor radius & inertial length')
     ax.grid()
     ax.legend()
+    ax.tick_params(labelsize=25)
 
 
 if (channel == 7):
@@ -145,7 +165,7 @@ if (channel == 7):
     x = np.rad2deg(x)
     y = data[40:50, :]*1.E9
     fig = plt.figure()
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 25
     ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log')   
     ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(ionosphere)', linestyle='solid', linewidth='2')
     ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(ionosphere)', linestyle='dashdot', linewidth='2')
@@ -157,6 +177,7 @@ if (channel == 7):
     ax.plot(x, y[9, :], c='hotpink', label='hot e-(magnetosphere)', linestyle='dashdot', linewidth='5')
     ax.grid()
     ax.legend()
+    ax.tick_params(labelsize=25)
     
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
 

@@ -733,9 +733,9 @@ subroutine NewtonPhi(N, MV_fix, MV_N, MV_S, CP, Phih, cvg, nPhi)
     endif
     if(abs(CC) < cvg(1, i) .and. cvg(1, i) <= 1.d0) then
       nPhi(i) = Phih(1, i) - CC
-     else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 1.d0) then
-      if(Phih(1, i) > 5.d1 .and. Phih(1, i) < 2.9990d4) then
-        nPhi(i) = Phih(1, i) - CC/abs(CC)*5.d0
+    else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 1.d0) then
+      if(Phih(1, i) > 0.d0 .and. Phih(1, i) < 2.9990d4) then
+        nPhi(i) = Phih(1, i) - CC/abs(CC)*5.d0*sqrt(cvg(1, i))
        else
         nPhi(i) = Phih(1, i) - CC/abs(CC)*cvg(1, i)
       endif

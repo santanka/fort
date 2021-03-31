@@ -8,10 +8,10 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_4_cvnminpoint/pds_J_kai_4_cvnminpoint_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_5_cvnminpoint/pds_J_kai_5_cvnminpoint_all.csv", delimiter=',', unpack=True)
 
-channel = 2
-#1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力
+channel = 7
+#1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:垂直圧力
 
 if (channel == 1):
     x = data[0, :]
@@ -166,19 +166,41 @@ if (channel == 7):
     y = data[40:50, :]*1.E9
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log')   
-    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(ionosphere)', linestyle='solid', linewidth='2')
-    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(ionosphere)', linestyle='dashdot', linewidth='2')
-    ax.plot(x, y[4, :], c='red', label='H+', linestyle='solid', linewidth='4')
-    ax.plot(x, y[5, :], c='deepskyblue', label='O+', linestyle='dotted', linewidth='2')
-    ax.plot(x, y[6, :], c='green', label='S+', linestyle='dotted', linewidth='4')
-    ax.plot(x, y[7, :], c='lime', label='S2+', linestyle='solid', linewidth='5')
-    ax.plot(x, y[8, :], c='blue', label='cold e-(magnetosphere)', linestyle='dashdot', linewidth='4')
-    ax.plot(x, y[9, :], c='hotpink', label='hot e-(magnetosphere)', linestyle='dashdot', linewidth='5')
+    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
+    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
+    ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[5, :], c='deepskyblue', label='O+(Io)', linestyle='dotted', linewidth='3')
+    ax.plot(x, y[6, :], c='green', label='S+(Io)', linestyle='dotted', linewidth='3')
+    ax.plot(x, y[7, :], c='lime', label='S2+(Io)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[8, :], c='blue', label='cold e-(Io)', linestyle='dashdot', linewidth='3')
+    ax.plot(x, y[9, :], c='hotpink', label='hot e-(Io)', linestyle='dashdot', linewidth='3')
     ax.grid()
     ax.legend()
+    fig.suptitle('Parallel Pressure')
     ax.tick_params(labelsize=25)
-    
+    plt.subplots_adjust(wspace=0.4, hspace=0.6)
+
+
+if (channel == 8):
+    x = data[0, :]
+    x = np.rad2deg(x)
+    y = data[30:40, :]*1.E9
+    fig = plt.figure()
+    plt.rcParams["font.size"] = 25
+    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='perpendicular pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
+    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
+    ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[5, :], c='deepskyblue', label='O+(Io)', linestyle='dotted', linewidth='3')
+    ax.plot(x, y[6, :], c='green', label='S+(Io)', linestyle='dotted', linewidth='3')
+    ax.plot(x, y[7, :], c='lime', label='S2+(Io)', linestyle='solid', linewidth='3')
+    ax.plot(x, y[8, :], c='blue', label='cold e-(Io)', linestyle='dashdot', linewidth='3')
+    ax.plot(x, y[9, :], c='hotpink', label='hot e-(Io)', linestyle='dashdot', linewidth='3')
+    ax.grid()
+    ax.legend()
+    fig.suptitle('Perpendicular Pressure')
+    ax.tick_params(labelsize=25)
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
 plt.tight_layout()

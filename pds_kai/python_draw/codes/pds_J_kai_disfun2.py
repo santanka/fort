@@ -8,7 +8,7 @@ Created on Wed Feb  3 21:36:01 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_4/pds_E_kai_4_MVN=0.55715313984661163_disfun_s=10_mu=7.7760893604685029E-016.csv", delimiter=',', unpack=True)
+data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_5_cvnminpoint/pds_E_kai_5_cvnminpoint_disfun_s=10_mu=0.0000000000000000.csv", delimiter=',', unpack=True)
 ss = data1[0][:]
 ss = np.rad2deg(ss)
 vperp = data1[2][:]
@@ -18,11 +18,12 @@ ff = np.log10(data1[8][:])
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-cm = plt.cm.get_cmap('rainbow')
+cm = plt.cm.get_cmap('turbo')
 
-ax.set_xlabel("S← MLT [degree] →N")
-ax.set_ylabel("vpara [m/s] (+ : S→N, - : N→S)")
-plt.title("distribution function (scale=log10)")
+ax.set_xlabel("S← MLT [degree] →N", fontsize=25)
+ax.set_ylabel("vpara [m/s] (+ : S→N, - : N→S)", fontsize=25)
+plt.title("distribution function (scale=log10)", fontsize=25)
+ax.yaxis.offsetText.set_fontsize(25)
 
 if np.trunc(max(ff))-10. > np.floor(min(ff)):
     a = np.trunc(max(ff))-10.
@@ -34,7 +35,7 @@ mappable = ax.scatter(ss, vpara, c=ff, vmin=a, vmax=np.trunc(max(ff)), cmap=cm)
 fig.colorbar(mappable, ax=ax)
 
 ax.grid()
-
+ax.tick_params(labelsize=25)
 plt.subplots_adjust(wspace=0.4, hspace=0.6)
 plt.rcParams["font.size"] = 25
 

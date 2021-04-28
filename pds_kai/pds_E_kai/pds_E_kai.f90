@@ -7,7 +7,7 @@ integer :: h, i, j, s, itn !do文用
 integer, parameter :: N = 255 !grid数
 integer, parameter :: Z = 500 !perp速度grid数
 integer, parameter :: MV = 128 !極小値となる座標
-integer, parameter :: CP = 0 !boundary以外の静電ポテンシャル無変化点
+integer, parameter :: CP = 128 !boundary以外の静電ポテンシャル無変化点
 double precision, parameter :: pi = 4.d0*atan(1.d0) !円周率
 character(len=80) :: dummy !読まない文字用
 
@@ -33,7 +33,7 @@ double precision, parameter :: Ms = 0 !衛星の質量
 double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !Boundary Condition(粒子のデータ)
-character(len=128) :: fileBC = 'pds_BC_E_kai_4.csv'
+character(len=128) :: fileBC = 'pds_BC_E_kai_7.csv'
 integer, parameter :: kind = 12 !粒子種数
 integer, parameter :: nsc = 4 !boundary:Nでの数密度調整をする粒子
 integer, parameter :: ssc = 9 !boundary:Sでの数密度調整をする粒子
@@ -45,7 +45,7 @@ double precision, dimension(kind) :: mass !質量
 integer, dimension(kind) :: ijn !injection number
 
 !Initial Condition(初期静電ポテンシャル分布)
-character(len=128) :: fileIC = 'pds_IC_E_kai_4.csv'
+character(len=128) :: fileIC = 'pds_IC_E_kai_7.csv'
 double precision, dimension(N) :: Phi !静電ポテンシャル分布
 
 !場の設定
@@ -80,13 +80,13 @@ double precision, dimension(kind) :: nsig !数密度更新値
 
 !保存ファイル名
 integer, parameter :: channel = 1 !はじめから(1)orつづきから(2)
-character(len=128) :: fileresult = 'pds_E_kai_4_result.csv'
+character(len=128) :: fileresult = 'pds_E_kai_7_result.csv'
 72 format(1PE25.15E3, 18(',', 1PE25.15E3)) !kind+7
-character(len=128) :: filepote = 'pds_E_kai_4_potential.csv'
+character(len=128) :: filepote = 'pds_E_kai_7_potential.csv'
 82 format(1PE25.15E3, 15(',', 1PE25.15E3)) !kind+4
-character(len=128) :: filemin = 'pds_E_kai_4_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_7_min.csv'
 92 format(1PE25.15E3) !1
-character(len=128) :: filecheck = 'pds_E_kai_4_check.csv'
+character(len=128) :: filecheck = 'pds_E_kai_7_check.csv'
 62 format(1PE25.15E3, 19(',', 1PE25.15E3)) !kind+8
 52 format(1PE25.15E3, 4(',', 1PE25.15E3)) !5(double precision)
 42 format(I5)
@@ -676,10 +676,10 @@ subroutine NewtonPhi(N, MV, CP, Phih, cvg, nPhi)
     nPhi(i) = Phih(1, i) - CC
    else if(abs(CC) >= cvg(1, i) .and. cvg(1, i) <= 1.d-2) then
     nPhi(i) = Phih(1, i) - CC/abs(CC)*cvg(1, i)
-   else if(abs(CC) < 1.d-2 .and. cvg(1, i) > 1.d-2) then
+   else if(abs(CC) < 1.d0 .and. cvg(1, i) > 1.d-2) then
     nPhi(i) = Phih(1, i) - CC
-   else if(abs(CC) >= 1.d-2 .and. cvg(1, i) > 1.d-2) then
-    nPhi(i) = Phih(1, i) - CC/abs(CC)*1.d-2
+   else if(abs(CC) >= 1.d0 .and. cvg(1, i) > 1.d-2) then
+    nPhi(i) = Phih(1, i) - CC/abs(CC)*1.d0
   endif
  enddo !i
  

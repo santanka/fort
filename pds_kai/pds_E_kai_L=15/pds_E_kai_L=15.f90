@@ -33,7 +33,7 @@ double precision, parameter :: Ms = 0 !衛星の質量
 double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !Boundary Condition(粒子のデータ)
-character(len=128) :: fileBC = 'pds_BC_E_kai_L=15_3.csv'
+character(len=128) :: fileBC = 'pds_BC_E_kai_L=15_4.csv'
 integer, parameter :: kind = 12 !粒子種数
 integer, parameter :: nsc = 4 !boundary:Nでの数密度調整をする粒子
 integer, parameter :: ssc = 9 !boundary:Sでの数密度調整をする粒子
@@ -45,7 +45,7 @@ double precision, dimension(kind) :: mass !質量
 integer, dimension(kind) :: ijn !injection number
 
 !Initial Condition(初期静電ポテンシャル分布)
-character(len=128) :: fileIC = 'pds_IC_E_kai_L=15_3.csv'
+character(len=128) :: fileIC = 'pds_IC_E_kai_L=15_4.csv'
 double precision, dimension(N) :: Phi !静電ポテンシャル分布
 
 !場の設定
@@ -79,13 +79,13 @@ double precision, dimension(kind) :: nsig !数密度更新値
 
 !保存ファイル名
 integer, parameter :: channel = 1 !はじめから(1)orつづきから(2)
-character(len=128) :: fileresult = 'pds_E_kai_L=15_3_result.csv'
+character(len=128) :: fileresult = 'pds_E_kai_L=15_4_result.csv'
 72 format(1PE25.15E3, 18(',', 1PE25.15E3)) !kind+7
-character(len=128) :: filepote = 'pds_E_kai_L=15_3_potential.csv'
+character(len=128) :: filepote = 'pds_E_kai_L=15_4_potential.csv'
 82 format(1PE25.15E3, 15(',', 1PE25.15E3)) !kind+4
-character(len=128) :: filemin = 'pds_E_kai_L=15_3_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_L=15_4_min.csv'
 92 format(1PE25.15E3) !1
-character(len=128) :: filecheck = 'pds_E_kai_L=15_3_check.csv'
+character(len=128) :: filecheck = 'pds_E_kai_L=15_4_check.csv'
 52 format(1PE25.15E3, 4(',', 1PE25.15E3)) !5(double precision)
 42 format(I5)
 32 format(1PE25.15E3, 7(',', 1PE25.15E3)) !8(double precision)

@@ -8,10 +8,10 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_4_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=15/pds_E_kai_L=15_4_all.csv", delimiter=',', unpack=True)
 
-channel = 4
-#1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力
+channel = 3
+#1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:Ozhogin et al. model
 
 if (channel == 1):
     x = data[0, :]
@@ -156,6 +156,28 @@ if (channel == 7):
     ax.legend()
     
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
+
+
+if (channel == 8):
+    x = data[0, :]
+    y = data[4:16, :]*1.E-6
+    z = np.zeros(len(x))
+    LL = 4
+    nabINV = np.arccos(np.sqrt(1./LL))
+    Neq = pow(10., 4.4693-0.4903*LL)
+    z = Neq*pow(np.cos(np.pi/2.*1.01*x/nabINV), -0.75)
+    x = np.rad2deg(x)
+    fig = plt.figure()
+    plt.rcParams["font.size"] = 20
+    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Number Density [cm^-3]', yscale='log', ylim=(1.E-2, 1.E6))   
+    ax.plot(x, y[4, :]+y[9, :], c='blue', label='e-(ionosphere)', linestyle='dashed', linewidth='4')
+    ax.plot(x, y[11, :], c='deepskyblue', label='e-(magnetosphere)', linestyle='dashdot', linewidth='4')
+    ax.plot(x, z, c='red', label='e-(Ozhogin et al.)', linestyle='solid', linewidth='4')
+    fig.suptitle('Number Density')
+    ax.grid()
+    ax.legend()
+
+
 
 plt.tight_layout()
 plt.show()

@@ -1,4 +1,4 @@
-species,N[m^-3],Tperp[eV],Tpara[eV],charge,mass,injection number (Matsuda 2009を参考に)
+species,N[m^-3],Tperp[eV],Tpara[eV],charge,mass,injection number (Matsuda 2009を参考に S2+コピーミス)
 JN:H+,3.d10,1.d-1,1.d-1,1.d0,1.67262192369d-27,233
 JN:e-,3.d10,1.d-1,1.d-1,-1.d0,9.1093837015d-31,233
 JS:H+,3.d10,1.d-1,1.d-1,1.d0,1.67262192369d-27,1

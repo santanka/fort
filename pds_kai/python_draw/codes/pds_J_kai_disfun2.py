@@ -8,7 +8,7 @@ Created on Wed Feb  3 21:36:01 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_5_cvnminpoint/pds_E_kai_5_cvnminpoint_disfun_s=10_mu=0.0000000000000000.csv", delimiter=',', unpack=True)
+data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_disfun_s=2_mu=0.0000000000000000.csv", delimiter=',', unpack=True)
 ss = data1[0][:]
 ss = np.rad2deg(ss)
 vperp = data1[2][:]

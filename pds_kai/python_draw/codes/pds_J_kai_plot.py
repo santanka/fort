@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_all.csv", delimiter=',', unpack=True)
 
-channel = 8
+channel = 2
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:垂直圧力
 
 if (channel == 1):
@@ -22,7 +22,7 @@ if (channel == 1):
     ax1.plot(x, y/1E3)
     ax1.grid()
     ax1.tick_params(labelsize=25)
-    ax2.set_xlabel('S← MLT [degree] →N', fontsize=25)
+    ax2.set_xlabel('S← MLAT [degree] →N', fontsize=25)
     ax2.set_ylabel('Electrostatic Potential [V]', fontsize=25)
     ax2.plot(x, y)
     ax2.set_ylim(-15, 50)
@@ -38,7 +38,7 @@ if (channel == 2):
     y = data[4:14, :]*1.E-6
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='Number Density [cm^-3]', yscale='log', ylim=(1.E-2, 1.E5))   
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='Number Density [cm^-3]', yscale='log', ylim=(1.E-2, 1.E5))   
     ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
     ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
     ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
@@ -63,7 +63,7 @@ if (channel == 3):
     ax1.set_yscale('log')
     ax1.grid()
     ax1.tick_params(labelsize=25)
-    ax2.set_xlabel('S← MLT [degree] →N', fontsize=25)
+    ax2.set_xlabel('S← MLAT [degree] →N', fontsize=25)
     ax2.set_ylabel('1 - VA/c', fontsize=25)
     ax2.plot(x, 1-y)
     ax2.set_yscale('log')
@@ -80,7 +80,7 @@ if (channel == 4):
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
     ax1 = fig.add_subplot(131, title='perpendicular')
-    ax1.set_xlabel('S← MLT [degree] →N')
+    ax1.set_xlabel('S← MLAT [degree] →N')
     ax1.set_ylabel('Pressure [nPa]')
     ax1.set_yscale('log')
     ax1.plot(x, y[0, :], c='purple', label='all')
@@ -90,7 +90,7 @@ if (channel == 4):
     ax1.legend()
     ax1.tick_params(labelsize=25)
     ax2 = fig.add_subplot(132, title='parallel')
-    ax2.set_xlabel('S← MLT [degree] →N')
+    ax2.set_xlabel('S← MLAT [degree] →N')
     ax2.set_ylabel('Pressure [nPa]')
     ax2.set_yscale('log')
     ax2.plot(x, y[1, :], c='purple', label='all')
@@ -100,7 +100,7 @@ if (channel == 4):
     ax2.legend()
     ax2.tick_params(labelsize=25)
     ax3 = fig.add_subplot(133, title='all')
-    ax3.set_xlabel('S← MLT [degree] →N')
+    ax3.set_xlabel('S← MLAT [degree] →N')
     ax3.set_ylabel('Pressure [nPa]')
     ax3.set_yscale('log')
     ax3.plot(x, y[2, :], c='purple', label='all')
@@ -119,7 +119,7 @@ if (channel == 5):
     z = data[78, :]
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='beta', yscale='log')
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='beta', yscale='log')
     ax.plot(x, y, c='orange', label='beta')
     ax.plot(x, z, c='dimgrey', label='me/mi', linestyle='-.')
     fig.suptitle('beta(ion, perpendicular)')
@@ -145,7 +145,7 @@ if (channel == 6):
             elr[j, i] = 1./cc/ee/BB[i]*np.sqrt(Ke[j]*(me*cc*cc+Ke[j]))
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='length [m]', yscale='log')   
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='length [m]', yscale='log')   
     ax.plot(x, y[0, :], c='orange', label='ion Larmor radius - KAW')
     #ax.plot(x, y[1, :], c='deepskyblue', label='electron Larmor radius')
     #ax.plot(x, y[2, :], c='red', label='ion inertial legth')
@@ -166,7 +166,7 @@ if (channel == 7):
     y = data[40:50, :]*1.E9
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
     ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
     ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
     ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
@@ -188,7 +188,7 @@ if (channel == 8):
     y = data[30:40, :]*1.E9
     fig = plt.figure()
     plt.rcParams["font.size"] = 25
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='perpendicular pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='perpendicular pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
     ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
     ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
     ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')

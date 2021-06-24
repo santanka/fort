@@ -99,10 +99,10 @@ character(len=128) :: fileall = 'pds_J_kai_6_cvnminpoint_all.csv'
 92 format(1PE25.15E3, 82(',', 1PE25.15E3)) !5*kind+33
 
 integer, parameter :: channel1 = 1 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: N1 = 10
+integer, parameter :: N1 = 69
 integer, parameter :: channel2 = 1 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
 integer, parameter :: Z2 = 1
-character(len=128) :: fileoption = 'pds_E_kai_6_cvnminpoint_disfun_'
+character(len=128) :: fileoption = 'pds_J_kai_6_cvnminpoint_disfun_'
 
 
 !/////データ抽出/////
@@ -800,7 +800,7 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
   !ファイル名作成
   write(filename1, *) s
   write(filename2, *) lam(N1) /pi*180.
-  filename = trim(adjustl(fileoption))//'s='//trim(adjustl(filename1))//'_MLT='//trim(adjustl(filename2))//'.csv'
+  filename = trim(adjustl(fileoption))//'s='//trim(adjustl(filename1))//'_MLAT='//trim(adjustl(filename2))//'.csv'
   print *, filename
   
   open(62, file=filename)

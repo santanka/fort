@@ -54,14 +54,14 @@ subroutine runge_kutta(z_f, phase_f, w_f, Bw_f, z_p, u_p, zeta_p, equator_flag, 
   call dz_dt(u_p_s, k1)
   call force(z_f, phase_f, w_f, Bw_f, z_p, u_p_s, l1, zeta_p)
 
-  call dz_dt(u_p_s + l1 / 2d0, k2)
-  call force(z_f, phase_f, w_f, Bw_f, z_p + k1 / 2d0, u_p_s + l1 / 2d0, l2, zeta_p)
+  call dz_dt(u_p_s + l1 / 2d0 * d_t, k2)
+  call force(z_f, phase_f, w_f, Bw_f, z_p + k1 / 2d0 * d_t, u_p_s + l1 / 2d0 * d_t, l2, zeta_p)
   
-  call dz_dt(u_p_s + l2 / 2d0, k3)
-  call force(z_f, phase_f, w_f, Bw_f, z_p + k2 / 2d0, u_p_s + l2 / 2d0, l3, zeta_p)
+  call dz_dt(u_p_s + l2 / 2d0 * d_t, k3)
+  call force(z_f, phase_f, w_f, Bw_f, z_p + k2 / 2d0 * d_t, u_p_s + l2 / 2d0 * d_t, l3, zeta_p)
   
-  call dz_dt(u_p_s + l3, k4)
-  call force(z_f, phase_f, w_f, Bw_f, z_p + k3, u_p_s + l3, l4, zeta_p)
+  call dz_dt(u_p_s + l3 * d_t, k4)
+  call force(z_f, phase_f, w_f, Bw_f, z_p + k3 * d_t, u_p_s + l3 * d_t, l4, zeta_p)
  
   u_p(:) = u_p(:) + (l1 + 2d0 * l2 + 2d0 * l3 + l4) * d_t / 6d0
   z_p    = z_p    + (k1 + 2d0 * k2 + 2d0 * k3 + k4) * d_t / 6d0

@@ -29,7 +29,7 @@ program main
      if (i_z == -n_z) then     
         phase(i_z) = 0d0
      else
-        phase(i_z) = phase(i_z - 1) - (k_init(i_z - 1) + k_init(i_z)) / 2d0 * d_z
+        phase(i_z) = phase(i_z - 1) - (k_init(i_z - 1) + k_init(i_z)) / 2d0 * d_z !右回り仮定
      end if
   end do
   
@@ -199,7 +199,7 @@ program main
       !------------------------------
       
       do i_z = -n_z, n_z
-         phase(i_z) = phase(i_z) + (freq_0(i_z) + freq_1(i_z)) / 2d0 * d_t
+         phase(i_z) = phase(i_z) + (freq_0(i_z) + freq_1(i_z)) / 2d0 * d_t !右回り仮定
       end do
       
       !$omp parallel num_threads(n_thread) &

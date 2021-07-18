@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 
 data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_all.csv", delimiter=',', unpack=True)
 
-channel = 2
+channel = 1
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:垂直圧力
 
 if (channel == 1):
-    x = data[0, :]
-    x = np.rad2deg(x)
+    x = data[1, :] / 7.1492E7
+    #x = np.rad2deg(x)
     y = data[3, :]
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
     ax1.set_ylabel('Electrostatic Potential [kV]', fontsize=25)

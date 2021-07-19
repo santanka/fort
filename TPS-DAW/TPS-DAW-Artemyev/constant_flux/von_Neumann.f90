@@ -22,7 +22,7 @@ program distribution_calculater
   DOUBLE PRECISION, PARAMETER :: beta = 0.1
   INTEGER, PARAMETER          :: N_p  = 20000000
   INTEGER, PARAMETER          :: n_phase_space = 100
-  INTEGER, PARAMETER          :: n_z = 16000
+  INTEGER, PARAMETER          :: n_z = 3600
   DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0  
   DOUBLE PRECISION, PARAMETER :: d_t = 1.0d0
   DOUBLE PRECISION, PARAMETER :: L_z = DBLE(n_z) * d_z 

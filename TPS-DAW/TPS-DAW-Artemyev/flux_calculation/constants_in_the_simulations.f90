@@ -23,15 +23,19 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of wave
   !-------------------------------------
-  DOUBLE PRECISION, PARAMETER :: w_p = 4d0
-  DOUBLE PRECISION, PARAMETER :: B_w = 10d-4
-  DOUBLE PRECISION, PARAMETER :: sweep_rate = 7.6d3 !fce_eq [kHz] 
-  DOUBLE PRECISION, PARAMETER :: freq_start = 0.3d0 ! [fce]
-  DOUBLE PRECISION, PARAMETER :: freq_end   = 0.45d0 ! [fce]
-  DOUBLE PRECISION, PARAMETER :: freq_sweep = freq_end - freq_start ! [fce]
-  DOUBLE PRECISION, PARAMETER :: t_element  = freq_sweep * fce_eq / sweep_rate / t_unit ! [t_unit]
-  DOUBLE PRECISION, PARAMETER :: dfdt = sweep_rate * t_unit / fce_eq
-  DOUBLE PRECISION, PARAMETER :: damping_region = 2000d0 ![cΩ^-1]
+  DOUBLE PRECISION, PARAMETER :: lambda_perp_eq = 150d3 ![m]
+  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 200 ![V]
+
+  !!不使用
+  !DOUBLE PRECISION, PARAMETER :: w_p = 4d0
+  !DOUBLE PRECISION, PARAMETER :: B_w = 10d-4
+  !DOUBLE PRECISION, PARAMETER :: sweep_rate = 7.6d3 !fce_eq [kHz] 
+  !DOUBLE PRECISION, PARAMETER :: freq_start = 0.3d0 ! [fce]
+  !DOUBLE PRECISION, PARAMETER :: freq_end   = 0.45d0 ! [fce]
+  !DOUBLE PRECISION, PARAMETER :: freq_sweep = freq_end - freq_start ! [fce]
+  !DOUBLE PRECISION, PARAMETER :: t_element  = freq_sweep * fce_eq / sweep_rate / t_unit ! [t_unit]
+  !DOUBLE PRECISION, PARAMETER :: dfdt = sweep_rate * t_unit / fce_eq
+  !DOUBLE PRECISION, PARAMETER :: damping_region = 2000d0 ![cΩ^-1]
   !時間経過とともにz>6000でfreqがNaNになる。   
   
   !-------------------------------------

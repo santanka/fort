@@ -1,0 +1,21 @@
+FC      = gfortran #ifort
+FCFLAGS = -fbacktrace -fbounds-check  #-CB -traceback -g 
+LDFLAGS = -fopenmp  #-qopenmp -static-intel
+TARGET  = PIC_simulation.exe
+
+OBJ  = constant_parameter.o \
+       lshell_setting.o \
+       subroutine.o \
+       PIC_simulation.o \
+
+all: $(TARGET)
+
+.SUFFIXES : .f90
+.f90.o:
+	$(FC) $(FCFLAGS) $(LDFLAGS) -c $<  
+
+$(TARGET): $(OBJ)
+	$(FC) -o $@ $(OBJ)  $(FCFLAGS) $(LDFLAGS)
+
+clean:
+	del -f *.o *.mod $(TARGET)

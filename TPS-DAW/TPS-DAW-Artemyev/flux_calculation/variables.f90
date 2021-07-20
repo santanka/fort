@@ -13,10 +13,12 @@ module variables
   INTEGER          :: n_file
   INTEGER, PARAMETER :: n_thr = 20
   DOUBLE PRECISION :: time
-  DOUBLE PRECISION :: z(-n_z : n_z)
-  DOUBLE PRECISION :: B(-n_z : n_z)
-  DOUBLE PRECISION :: k_init(-n_z : n_z)
-  DOUBLE PRECISION :: phase(-n_z : n_z)
+  DOUBLE PRECISION :: z_position(-n_z : n_z)
+  DOUBLE PRECISION :: BB(-n_z : n_z)
+  DOUBLE PRECISION :: number_density(-n_z : n_z)
+  DOUBLE PRECISION :: alfven_velocity(-n_z : n_z)
+  DOUBLE PRECISION :: ion_acoustic_gyroradius(-n_z : n_z)
+  DOUBLE PRECISION :: wave_phase(-n_z : n_z)
   DOUBLE PRECISION :: rnd
   CHARACTER(64)    :: file_output, file_particle, file_wave, file_data
   CHARACTER(64)    :: file_energy, file_alpha, file_distribution, file_phase_space
@@ -28,7 +30,9 @@ module variables
   ! for wave
   !-------------------------------------
 
-  DOUBLE PRECISION :: freq_0(-n_z : n_z), freq_1(-n_z : n_z)
+  DOUBLE PRECISION :: wave_frequency(-n_z : n_z)
+  DOUBLE PRECISION :: wave_number_perp(-n_z : n_z)
+  DOUBLE PRECISION :: wave_number_para(-n_z : n_z)
   DOUBLE PRECISION :: ampl_0(-n_z : n_z), ampl_1(-n_z : n_z)
   DOUBLE PRECISION :: V_g(-n_z : n_z), V_g_0
   DOUBLE PRECISION :: z_front, B_front, V_g_front

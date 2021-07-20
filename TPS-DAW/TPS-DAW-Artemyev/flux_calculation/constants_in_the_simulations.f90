@@ -23,7 +23,7 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of wave
   !-------------------------------------
-  DOUBLE PRECISION, PARAMETER :: lambda_perp_eq = 150d3 ![m]
+  DOUBLE PRECISION, PARAMETER :: wavelength_perp_eq = 150d3 / z_unit
   DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 200 ![V]
 
   !!ïségóp

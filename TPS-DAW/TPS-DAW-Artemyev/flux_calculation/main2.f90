@@ -35,8 +35,8 @@ program main
         if (i_z == -n_z) then
             wave_phase(i_z) = 0d0
         else
-            CALL wave_number_para_to_wave_phase_initial &
-                & (wave_number_para(i_z - 1), wave_number_para(i_z), wave_phase(i_z -1), wave_phase(i_z))
+            CALL wave_number_para_to_wave_phase_initial(wave_number_para(i_z - 1), wave_number_para(i_z), & 
+                &wave_phase(i_z -1), wave_phase(i_z))
         end if
         
     end do !i_z
@@ -69,16 +69,16 @@ program main
     allocate(energy0(1:N_particle))
     allocate(alpha_eq(1:N_particle))
     allocate(z_particle(1:N_particle))
-    allocate(u_particle(0:2, 1:n_p))
-    allocate(equator_time(1:n_p))
-    allocate(equator_flag(1:n_p))
-    allocate(wave_flag(1:n_p))
-    allocate(edge_flag(1:n_p))
-    allocate(sign_theta0(1:n_p))   
-    allocate(sign_theta1(1:n_p))
-    allocate(cross_theta_0(1:n_p))
-    allocate(Cw_flag(1:n_p))
-    allocate(S_flag(1:n_p))
+    allocate(u_particle(0:2, 1:N_particle))
+    allocate(equator_time(1:N_particle))
+    allocate(equator_flag(1:N_particle))
+    allocate(wave_flag(1:N_particle))
+    allocate(edge_flag(1:N_particle))
+    allocate(sign_theta0(1:N_particle))   
+    allocate(sign_theta1(1:N_particle))
+    allocate(cross_theta_0(1:N_particle))
+    allocate(Cw_flag(1:N_particle))
+    allocate(S_flag(1:N_particle))
     
     !get the values
     write(file_data,'(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
@@ -88,7 +88,7 @@ program main
        read(500,*)
     end do !i
   
-    do i = 1, n_p
+    do i = 1, N_particle
        read(500,*,iostat=ios) energy0(i), alpha0(i), z_particle(i), alpha_eq(i) 
        
        gamma0(i) = DBLE(energy0(i)) / m_e + 1d0     
@@ -134,8 +134,38 @@ program main
     end do !i_thr
 
 
-    
+    !----------------
+    !simulation start
+    !----------------
+    do i_time = 1, n_time
+        time = DBLE(i_t) * d_t
 
+
+        !-----------------
+        !update wave_phase
+        !-----------------
+        do i_z = -n_z, n_z
+            CALL time_to_wave_phase_update(wave_phase(i_z), wave_frequency(i_z))
+        end do !i_z
+
+
+        do i_particle = 1, N_particle
+            z_particle_sim = z_particle(i_particle)
+            u_particle_sim(:) = u_particle(:, i_particle)
+            equator_flag_sim = equator_flag(i_particle)
+            wave_flag_sim = wave_flag(i_particle)
+            edge_flag_sim = edge_flag(i_particle)
+            sign_theta0_sim = sign_theta0(i_particle)
+            cross_theta_0_sim = cross_theta_0(i_particle)
+            Cw_flag_sim = Cw_flag(i_particle)
+            S_flag_sim = S_flag(i_particle)
+
+            N_file = 20 + omp_get_thread_num()
+
+
+        end do !i_particle
+    
+    end do !i_time
 
 
 

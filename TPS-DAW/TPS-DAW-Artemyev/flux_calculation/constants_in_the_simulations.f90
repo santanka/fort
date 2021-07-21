@@ -13,11 +13,11 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of simulation system
   !-------------------------------------
-  INTEGER, PARAMETER          :: n_t = 40000 ! (5.4966 [s])
+  INTEGER, PARAMETER          :: n_time = 80000 ! (10.9932 [s])
   INTEGER, PARAMETER          :: n_z = 3600 ! (n + 1) for dB_dz
   DOUBLE PRECISION, PARAMETER :: d_t = 1.0d0
   DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0
-  DOUBLE PRECISION, PARAMETER :: L_t = DBLE(n_t) * d_t
+  DOUBLE PRECISION, PARAMETER :: L_t = DBLE(n_time) * d_t
   DOUBLE PRECISION, PARAMETER :: L_z = DBLE(n_z) * d_z ! (n - 1) for dB_dz
 
   !-------------------------------------

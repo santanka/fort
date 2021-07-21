@@ -8,7 +8,7 @@ module variables
   ! variables
   !-------------------------------------
 
-  INTEGER          :: i_t, i_z, i_p, i_phase, i_alpha, i_grid, i_thr
+  INTEGER          :: i_time, i_z, i_particle, i_phase, i_alpha, i_grid, i_thr
   INTEGER          :: i, j, ios, a, E, i_v_para, i_v_perp
   INTEGER          :: N_file
   INTEGER, PARAMETER :: N_thr = 20
@@ -50,7 +50,7 @@ module variables
   DOUBLE PRECISION :: v_particle_para, v_particle_perp
   DOUBLE PRECISION :: v_0, v_1
   DOUBLE PRECISION, allocatable :: z_particle(:), u_particle(:,:), u_particle_eq(:,:), v_eq(:,:)
-  DOUBLE PRECISION :: z_p_sim, u_p_sim(0:2)
+  DOUBLE PRECISION :: z_particle_sim, u_particle_sim(0:2)
   DOUBLE PRECISION,allocatable :: equator_time(:)
   INTEGER,allocatable          :: equator_flag(:), wave_flag(:), edge_flag(:)
   INTEGER :: equator_flag_sim, wave_flag_sim, edge_flag_sim 

@@ -168,3 +168,27 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
+subroutine z_position_to_electrostatic_potential(z_position, BB, electrostatic_potential)
+    use constant_parameter
+    use lshell_setting
+    use constants_in_the_simulations
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: z_position, BB
+    DOUBLE PRECISION, INTENT(OUT) :: electrostatic_potential
+    DOUBLE PRECISION :: radius, MLAT, wave_number_perp, ion_acoustic_gyroradius, gg
+
+    CALL z_position_to_radius_MLAT(z_position, radius, MLAT)
+    CALL BB_to_wave_number_perp(BB, wave_number_perp)
+    CALL z_position_to_ion_acoustic_gyroradius(z_position, BB, ion_acoustic_gyroradius)
+
+    gg = 1d0 / 2d0 * (DTANH(360d0 / pi * DABS(MLAT) - 5d0) - DTANH(-5d0))
+
+    electrostatic_potential = - wave_number_perp**2d0 * ion_acoustic_gyroradius**2d0 &
+        & * (1d0 + Temperature_ion / Temperature_electron) * electrostatic_potential_0 * gg
+    
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!

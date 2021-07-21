@@ -23,8 +23,8 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of wave
   !-------------------------------------
-  DOUBLE PRECISION, PARAMETER :: wavelength_perp_eq = 150d3 / z_unit
-  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 200 ![V]
+  DOUBLE PRECISION, PARAMETER :: wavelength_perp_eq = 150d3 / z_unit ![m]
+  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 200 / V_unit ![V]
 
   !!ïségóp
   !DOUBLE PRECISION, PARAMETER :: w_p = 4d0
@@ -41,7 +41,7 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of particle
   !-------------------------------------
-  INTEGER            :: N_p  
+  INTEGER            :: N_particle
   INTEGER, PARAMETER :: n_thread = 2
 
 end module constants_in_the_simulations

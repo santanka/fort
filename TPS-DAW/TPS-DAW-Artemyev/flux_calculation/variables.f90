@@ -10,8 +10,8 @@ module variables
 
   INTEGER          :: i_t, i_z, i_p, i_phase, i_alpha, i_grid, i_thr
   INTEGER          :: i, j, ios, a, E, i_v_para, i_v_perp
-  INTEGER          :: n_file
-  INTEGER, PARAMETER :: n_thr = 20
+  INTEGER          :: N_file
+  INTEGER, PARAMETER :: N_thr = 20
   DOUBLE PRECISION :: time
   DOUBLE PRECISION :: z_position(-n_z : n_z)
   DOUBLE PRECISION :: BB(-n_z : n_z)
@@ -33,7 +33,7 @@ module variables
   DOUBLE PRECISION :: wave_frequency(-n_z : n_z)
   DOUBLE PRECISION :: wave_number_perp(-n_z : n_z)
   DOUBLE PRECISION :: wave_number_para(-n_z : n_z)
-  DOUBLE PRECISION :: ampl_0(-n_z : n_z), ampl_1(-n_z : n_z)
+  DOUBLE PRECISION :: electrostatic_potential(-n_z : n_z)
   DOUBLE PRECISION :: V_g(-n_z : n_z), V_g_0
   DOUBLE PRECISION :: z_front, B_front, V_g_front
   DOUBLE PRECISION :: z_edge,  B_edge,  V_g_edge
@@ -46,10 +46,10 @@ module variables
   DOUBLE PRECISION, allocatable :: alpha0(:), gamma0(:), energy0(:), alpha_eq(:)
   DOUBLE PRECISION :: alpha, gamma, energy, B0_p
   INTEGER          :: alpha_loop, energy_loop, phi_loop
-  DOUBLE PRECISION :: v, zeta
-  DOUBLE PRECISION :: v_para, v_perp
+  DOUBLE PRECISION :: v_particle, zeta
+  DOUBLE PRECISION :: v_particle_para, v_particle_perp
   DOUBLE PRECISION :: v_0, v_1
-  DOUBLE PRECISION, allocatable :: z_p(:), u_p(:,:), u_p_eq(:,:), v_eq(:,:)
+  DOUBLE PRECISION, allocatable :: z_particle(:), u_particle(:,:), u_particle_eq(:,:), v_eq(:,:)
   DOUBLE PRECISION :: z_p_sim, u_p_sim(0:2)
   DOUBLE PRECISION,allocatable :: equator_time(:)
   INTEGER,allocatable          :: equator_flag(:), wave_flag(:), edge_flag(:)

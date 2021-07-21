@@ -53,25 +53,23 @@ program main
     !count the quantity of the data
     WRITE(file_data, '(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     OPEN (500, file = file_data)
-    N_p = 0
+    N_particle = 0
     do !s
         read(500, *, end = 99)
-        N_p = N_p + 1
+        N_particle = N_particle + 1
     end do !s
 
-    99 N_p = N_p - 2
-    print *, 'N_p = ', N_p
+    99 N_particle = N_particle - 2
+    print *, 'N_particle = ', N_particle
     close(500)
 
     !allocate the capacity
-    allocate(alpha0(1:n_p))
-    allocate(gamma0(1:n_p))
-    allocate(energy0(1:n_p))
-    allocate(alpha_eq(1:n_p))
-    allocate(z_p(1:n_p))
-    allocate(u_p(0:2, 1:n_p))
-    allocate(u_p_eq(0:2, 1:n_p))
-    allocate(v_eq(0:2, 1:n_p))
+    allocate(alpha0(1:N_particle))
+    allocate(gamma0(1:N_particle))
+    allocate(energy0(1:N_particle))
+    allocate(alpha_eq(1:N_particle))
+    allocate(z_particle(1:N_particle))
+    allocate(u_particle(0:2, 1:n_p))
     allocate(equator_time(1:n_p))
     allocate(equator_flag(1:n_p))
     allocate(wave_flag(1:n_p))
@@ -91,16 +89,52 @@ program main
     end do !i
   
     do i = 1, n_p
-       read(500,*,iostat=ios) energy0(i), alpha0(i), z_p(i), alpha_eq(i) 
+       read(500,*,iostat=ios) energy0(i), alpha0(i), z_particle(i), alpha_eq(i) 
        
        gamma0(i) = DBLE(energy0(i)) / m_e + 1d0     
-       v         = DSQRT(1d0 - 1d0/gamma0(i)**2)
-       v_para    = v * DCOS(alpha0(i)*deg2rad)
-       v_perp    = v * DSIN(alpha0(i)*deg2rad)
-       u_p(0, i) = gamma0(i) * v_para
-       u_p(1, i) = gamma0(i) * v_perp
-       u_p(2, i) = 2d0 * pi * grnd() 
+       v_particle = DSQRT(1d0 - 1d0/gamma0(i)**2)
+       v_particle_para = v_particle * DCOS(alpha0(i)*deg2rad)
+       v_particle_perp = v_particle * DSIN(alpha0(i)*deg2rad)
+       u_particle(0, i) = gamma0(i) * v_particle_para
+       u_particle(1, i) = gamma0(i) * v_particle_perp
+       u_particle(2, i) = 2d0 * pi * grnd() 
     end do !i
+
+    !flag & sign reset
+    sign_theta0 = 0
+    sign_theta1 = 0
+    cross_theta_0 = 0
+    Cw_flag = 0
+    S_flag = 0
+    equator_flag = 0
+    equator_time = 0
+    wave_flag = 0
+    edge_flag = 0
+
+
+    !-----------------------
+    !initial setting of wave
+    !-----------------------
+    if (wave_existance == .true.) then
+        do i_z = -n_z, n_z
+            CALL z_position_to_electrostatic_potential(z_position(i_z), BB(i_z), electrostatic_potential(i_z))
+        end do !i_z
+    else
+        electrostatic_potential = 0d0
+    end if
+    
+
+    !---------
+    !file open
+    !---------
+    do i_thr = 0, N_thr
+        N_file = 20 + i_thr
+        WRITE(file_equator, '(A7, I3.3, A17, I2.2, A4)') 'results', myrank, '/count_at_equator', i_thr, '.dat'
+        OPEN(unit = N_file, file = file_equator)
+    end do !i_thr
+
+
+    
 
 
 

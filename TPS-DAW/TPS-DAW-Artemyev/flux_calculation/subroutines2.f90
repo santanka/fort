@@ -398,6 +398,39 @@ subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_par
     end if
 
 end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine u_particle_to_energy(u_particle, energy)
+    
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: u_particle(0:2)
+    DOUBLE PRECISION, INTENT(OUT) :: energy
+    DOUBLE PRECISION :: gamma
+
+    gamma = DSQRT(1 + u_particle(0)**2d0 + u_particle(1)**2d0)
+    energy = gamma - 1d0
+    
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine u_particle_to_alpha_eq(z_particle, u_particle, alpha_particle_eq)
+
+    use constant_parameter, only: rad2deg
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: z_particle, u_particle(0:2)
+    DOUBLE PRECISION, INTENT(OUT) :: alpha_particle_eq
+    DOUBLE PRECISION :: BB_particle
+
+    CALL z_position_to_BB(z_particle, BB_particle)
+    alpha_particle_eq = ASIN(SIN(ATAN2(u_particle(1), u_particle(0))) / SQRT(BB_particle)) * rad2deg
+
+end subroutine
+
     
 
 

@@ -165,6 +165,17 @@ program main
             CALL particle_update_by_runge_kutta(z_position, wave_phase, z_particle_sim, &
                 & u_particle_sim, equator_flag_sim, edge_flag_sim)
             
+            if (equator_flag_sim == 1) then
+                CALL u_particle_to_energy(u_particle_sim, energy_particle)
+                CALL u_particle_to_alpha(z_particle_sim, u_particle_sim, alpha_particle_eq)
+                WRITE(unit = N_file, fmt = '(5E15.7, 4I3)') time, alpha_particle_eq, energy_particle, alpha_eq(i_particle), &
+                    & energy0(i_particle), wave_flag(i_particle), cross_theta_0(i_particle), Cw_flag(i_particle), S_flag(i_particle)
+            
+                z_particle_sim = grnd() * ABS(z_particle_sim - L_z) + z_particle_sim
+                
+            end if
+
+            
 
 
         end do !i_particle

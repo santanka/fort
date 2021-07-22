@@ -67,7 +67,7 @@ module variables
   !-------------------------------------
 
   DOUBLE PRECISION, allocatable :: sign_theta0(:), sign_theta1(:)
-  DOUBLE PRECISION :: B_p, alpha_p, energy_p, zeta_p
+  DOUBLE PRECISION :: BB_particle, alpha_particle_eq, energy_particle
   DOUBLE PRECISION :: freq_p, ampl_p, k_p, V_g_p
   DOUBLE PRECISION :: gamma_p, V_R_p, theta_p, Cw_p, w_tr_p, dB_dz_p, dk_dB_p, S_p
   INTEGER, allocatable :: cross_theta_0(:)

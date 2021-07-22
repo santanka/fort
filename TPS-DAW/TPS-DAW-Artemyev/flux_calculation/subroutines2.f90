@@ -113,7 +113,7 @@ subroutine z_position_to_wave_frequency(z_position, wave_frequency)
     DOUBLE PRECISION :: ss, alfven_velocity_eq
 
     ss = z_position / r_eq
-    CALL z_position_to_alfven_velocity(0, alfven_velocity_eq)
+    CALL z_position_to_alfven_velocity(0d0, 1d0, alfven_velocity_eq)
     wave_frequency = pi / z_position * alfven_velocity_eq
 
 end subroutine
@@ -222,24 +222,24 @@ subroutine z_particle_to_position(z_particle, z_position, i_z_left, i_z_right, r
     difference = DABS(z_position - z_particle)
     i_min = MINLOC(difference) - (n_z + 1) !array_difference : 0~2*n_z+1
 
-    if (i_min >= n_z) then
+    if (i_min(1) >= n_z) then
         i_z_left = n_z - 1
         i_z_right = n_z
         ratio = 1d0
 
-    else if (i_min <= -n_z) then
+    else if (i_min(1) <= -n_z) then
         i_z_left = n_z - 1
         i_z_right = n_z
         ratio = 1d0
 
     else
-        difference_min = z_position(i_min) - z_particle
+        difference_min = z_position(i_min(1)) - z_particle
         if (difference_min > 0) then
-            i_z_left = i_min - 1
-            i_z_right = i_min
+            i_z_left = i_min(1) - 1
+            i_z_right = i_min(1)
         else if (difference_min <= 0) then
-            i_z_left = i_min
-            i_z_right = i_min + 1
+            i_z_left = i_min(1)
+            i_z_right = i_min(1) + 1
         end if
 
         ratio = (z_particle - z_position(i_z_left)) / (z_position(i_z_right) - z_position(i_z_left))
@@ -250,31 +250,158 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine particle_update_by_runge_kutta()
-    use constants_in_the_simulations, only: d_t, n_z, N_particle, L_z, d_z
+subroutine u_particle_to_gamma(u_particle, gamma)
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: u_particle(0:2)
+    DOUBLE PRECISION, INTENT(OUT) :: gamma
+
+    gamma = DSQRT(1d0 + u_particle(0)**2d0 + u_particle(1)**2d0)
+
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine u_particle_to_v_particle_para(u_particle, v_particle_para)
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: u_particle(0:2)
+    DOUBLE PRECISION, INTENT(OUT) :: v_particle_para
+    DOUBLE PRECISION :: gamma
+
+    CALL u_particle_to_gamma(u_particle, gamma)
+
+    v_particle_para = u_particle(0) / gamma
+
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine z_particle_to_dB_dz(z_particle, dB_dz)
+
+    use lshell_setting, only: r_eq
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: z_particle
+    DOUBLE PRECISION, INTENT(OUT) :: dB_dz
+    DOUBLE PRECISION :: radius, MLAT
+
+    CALL z_position_to_radius_MLAT(z_particle, radius, MLAT)
+
+    dB_dz = 3d0 * DSIN(MLAT) * (5d0 * DSIN(MLAT)**2d0 + 3d0) / DCOS(MLAT)**8d0 / (3d0 * DSIN(MLAT)**2d0 + 1d0) / r_eq
+
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine electrostatic_potential_to_EE_wave_para(electrostatic_potential, wave_number_para, wave_phase, EE_wave_para)
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: electrostatic_potential, wave_number_para, wave_phase
+    DOUBLE PRECISION, INTENT(OUT) :: EE_wave_para
+
+    EE_wave_para = - wave_number_para * electrostatic_potential * DCOS(wave_phase)
+
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
+    !p -> particle
+
+    use constant_parameter, only: pi
+    use lshell_setting, only: charge
+    use constants_in_the_simulations, only: n_z
+
+    implicit none
+
+    DOUBLE PRECISION, INTENT(IN) :: z_position(-n_z:n_z), wave_phase(-n_z:n_z)
+    DOUBLE PRECISION, INTENT(IN) :: z_p, u_p(0:2)
+    DOUBLE PRECISION, INTENT(OUT) :: force(0:2)
+    DOUBLE PRECISION :: gamma, ratio, BB_p, dB_dz_p, wave_number_perp_p, wave_number_para_p, force_wave(0:2)
+    DOUBLE PRECISION :: electrostatic_potential_p, wave_phase_p, EE_wave_para_p
+    INTEGER :: i_z_left, i_z_right
+
+    CALL u_particle_to_gamma(u_p, gamma)
+    CALL z_particle_to_position(z_p, z_position, i_z_left, i_z_right, ratio)
+    CALL z_position_to_BB(z_p, BB_p)
+    CALL z_particle_to_dB_dz(z_p, dB_dz_p)
+    CALL BB_to_wave_number_perp(BB_p, wave_number_perp_p)
+    CALL z_position_to_wave_number_para(z_p, BB_p, wave_number_perp_p, wave_number_para_p)
+    CALL z_position_to_electrostatic_potential(z_p, BB_p, electrostatic_potential_p)
+
+    wave_phase_p = (1d0 - ratio) * wave_phase(i_z_left) + ratio * wave_phase(i_z_right)
+
+    CALL electrostatic_potential_to_EE_wave_para(electrostatic_potential_p, wave_number_para_p, wave_phase_p, EE_wave_para_p)
+
+    !force(wave)
+    force_wave(0) = - charge * EE_wave_para_p
+    force_wave(1) = 0d0
+    force_wave(2) = 0d0
+
+    !force
+    force(0) = - u_p(1)**2d0 / 2d0 / BB_p / gamma * dB_dz_p + force_wave(0)
+    force(1) = u_p(0) * u_p(1) / 2d0 / BB_p / gamma * dB_dz_p + force_wave(1)
+    force(2) = charge * BB_p / gamma
+
+end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_particle, equator_flag, edge_flag)
+
+    use constants_in_the_simulations, only: d_t, n_z, L_z, d_z
 
     implicit none
 
     DOUBLE PRECISION, INTENT(IN) :: z_in(-n_z:n_z), wave_phase_in(-n_z:n_z)
-    DOUBLE PRECISION, INTENT(IN) :: wave_frequency_in(-n_z:n_z), electrostatic_potential_in(-n_z:n_z)
     DOUBLE PRECISION, INTENT(INOUT) :: z_particle, u_particle(0:2)
-    INTEGER, INTENT(INOUT) :: wave_flag
     INTEGER, INTENT(OUT) :: equator_flag
     INTEGER, INTENT(OUT) :: edge_flag
-    DOUBLE PRECISION :: l1(0:2), l2(0:2), l3(0:2), l4(0:2), u_particle_s
-    DOUBLE PRECISION :: k1, k2, k3, k4
-    DOUBLE PRECISION :: electrostatic_potential_particle, Electric_field
-    DOUBLE PRECISION :: ratio
-    DOUBLE PRECISION :: i_z_left, i_z_right
+    DOUBLE PRECISION :: ff_RK_1(0:2), ff_RK_2(0:2), ff_RK_3(0:2), ff_RK_4(0:2), u_particle_s(0:2)
+    DOUBLE PRECISION :: kk_RK_1, kk_RK_2, kk_RK_3, kk_RK_4
+    
 
-    !--------------------
-    !collision_with_waves
-    !--------------------
+    u_particle_s(:) = u_particle(:)
 
-    if (wave_flag == 0) then
-        CALL z_particle_to_position(z_particle, z_in, i_z_left, i_z_right, ratio)
-        electrostatic_potential_particle = (1d0 - ratio) * electrostatic_potential_in(i_z_left) &
-            & + ratio * electrostatic_potential_in(i_z_right)
-            
+    !RK4
+    CALL u_particle_to_v_particle_para(u_particle_s, kk_RK_1)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle, u_particle, ff_RK_1)
+
+    CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_1 / 2d0 * d_t, kk_RK_2)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_1 / 2d0 * d_t, u_particle_s + ff_RK_1 / 2d0 * d_t, ff_RK_2)
+
+    CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_2 / 2d0 * d_t, kk_RK_3)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_2 / 2d0 * d_t, u_particle_s + ff_RK_2 / 2d0 * d_t, ff_RK_3)
+
+    CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_3 * d_t, kk_RK_4)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_3 * d_t, u_particle_s + ff_RK_3 * d_t, ff_RK_4)
+
+    !particle update
+    u_particle(:) = u_particle(:) + (ff_RK_1(:) + 2d0 * ff_RK_2(:) + 2d0 * ff_RK_3(:) + ff_RK_4(:)) * d_t / 6d0
+    z_particle = z_particle + (kk_RK_1 + 2d0 * kk_RK_2 + 2d0 * kk_RK_3 + kk_RK_4) * d_t / 6d0
+    
+    if (z_particle <= 0d0) then
+        z_particle = - z_particle
+        u_particle(0) = DABS(u_particle(0))
+        equator_flag = 1
+
+    else if (z_particle >= L_z) then !mirror
+        z_particle = L_z - (z_particle - L_z)
+        u_particle(0) = - DABS(u_particle(0))
+        edge_flag = 1
+
+    end if
+
+end subroutine
+    
+
+
+
+
         
 

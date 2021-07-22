@@ -162,6 +162,10 @@ program main
 
             N_file = 20 + omp_get_thread_num()
 
+            CALL particle_update_by_runge_kutta(z_position, wave_phase, z_particle_sim, &
+                & u_particle_sim, equator_flag_sim, edge_flag_sim)
+            
+
 
         end do !i_particle
     

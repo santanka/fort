@@ -172,21 +172,65 @@ program main
                     & energy0(i_particle), wave_flag(i_particle), cross_theta_0(i_particle), Cw_flag(i_particle), S_flag(i_particle)
             
                 z_particle_sim = grnd() * ABS(z_particle_sim - L_z) + z_particle_sim
-                
+                CALL z_position_to_BB(z_particle_sim, BB_particle)
+                alpha = ASIN(SQRT(BB_particle * SIN(alpha_eq(i_particle) * deg2rad)**2d0))
+                v_particle = SQRT(1d0 - 1d0 / gamma0(i_particle)**2d0)
+                v_particle_para = v_particle * COS(alpha)
+                v_particle_perp = v_particle * SIN(alpha)
+                u_particle_sim(0) = gamma0(i_particle) * v_particle_para
+                u_particle_sim(1) = gamma0(i_particle) * v_particle_perp
+                u_particle_sim(2) = 2d0 * pi * grnd()
+                equator_flag_sim = 0
+                wave_flag_sim = 0
+                Cw_flag_sim = 0
+                S_flag_sim = 0
+                cross_theta_0_sim = 0                
             end if
 
-            
+            if (edge_flag_sim == 1) then
+                z_particle_sim = grnd() * ABS(z_particle_sim - L_z) + z_particle_sim
+                CALL z_position_to_BB(z_particle_sim, BB_particle)
+                alpha = ASIN(SQRT(BB_particle * SIN(alpha_eq(i_particle) * deg2rad)**2d0))
+                v_particle = SQRT(1d0 - 1d0 / gamma0(i_particle)**2d0)
+                v_particle_para = - v_particle * COS(alpha)
+                v_particle_perp = v_particle * SIN(alpha)
+                u_particle_sim(0) = gamma0(i_particle) * v_particle_para
+                u_particle_sim(1) = gamma0(i_particle) * v_particle_perp
+                u_particle_sim(2) = 2d0 * pi * grnd()
+                edge_flag_sim = 0
+            end if
 
+            z_particle(i_particle) = z_particle_sim
+            u_particle(:, i_particle) = u_particle_sim(:)
+            wave_flag(i_particle) = wave_flag_sim
+            edge_flag(i_particle) = edge_flag_sim
+            sign_theta0(i_particle) = sign_theta0_sim
+            sign_theta1(i_particle) = sign_theta1_sim
+            cross_theta_0(i_particle) = cross_theta_0_sim
+            Cw_flag(i_particle) = Cw_flag_sim
+            S_flag(i_particle) = S_flag_sim
 
         end do !i_particle
-    
+        !$omp end do nowait
+        !$omp end parallel
+
+        !-------
+        !out put
+        !-------
+        if (mod(i_time, 1000) == 0) then
+            WRITE(string, '(F6.2, A2, A6, I2.2)') DBLE(i_time) / DBLE(n_time) * 100d0, ' %'
+            CALL write_time(string)
+        end if
+            
     end do !i_time
 
+    CLOSE(200)
+    print *, "end"
 
 
-
-
-
+    !-MPI------------------
+    CALL MPI_FINALIZE(ierr)
+    !-MPI------------------
 
     
 end program main

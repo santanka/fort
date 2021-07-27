@@ -20,7 +20,7 @@ program distribution_calculater
   DOUBLE PRECISION, PARAMETER :: fmax = 10d0
   DOUBLE PRECISION, PARAMETER :: fmin = 0d0
   DOUBLE PRECISION, PARAMETER :: beta = 0.1
-  INTEGER, PARAMETER          :: N_p  = 20000000
+  INTEGER, PARAMETER          :: N_p  = 100     !20000000
   INTEGER, PARAMETER          :: n_phase_space = 100
   INTEGER, PARAMETER          :: n_z = 3600
   DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0  

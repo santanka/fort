@@ -1,130 +1,130 @@
 program distribution_calculater
 
-  use mt19937
-  use constant_parameter
-  use lshell_setting
+   use mt19937
+   use constant_parameter
+   use lshell_setting
 
-  implicit none
-  
-
-  !--------------------------------------
-  !  constants_in_the_simulation
-  !--------------------------------------
-
-  DOUBLE PRECISION, PARAMETER :: ave_p_para = 0.2d0
-  DOUBLE PRECISION, PARAMETER :: ave_p_perp = 0.2d0 
-  DOUBLE PRECISION, PARAMETER :: p_para_max = -0d0
-  DOUBLE PRECISION, PARAMETER :: p_para_min = -1d0
-  DOUBLE PRECISION, PARAMETER :: p_perp_max = 1d0
-  DOUBLE PRECISION, PARAMETER :: p_perp_min = 0d0
-  DOUBLE PRECISION, PARAMETER :: fmax = 10d0
-  DOUBLE PRECISION, PARAMETER :: fmin = 0d0
-  DOUBLE PRECISION, PARAMETER :: beta = 0.1
-  INTEGER, PARAMETER          :: N_p  = 100     !20000000
-  INTEGER, PARAMETER          :: n_phase_space = 100
-  INTEGER, PARAMETER          :: n_z = 3600
-  DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0  
-  DOUBLE PRECISION, PARAMETER :: d_t = 1.0d0
-  DOUBLE PRECISION, PARAMETER :: L_z = DBLE(n_z) * d_z 
-  DOUBLE PRECISION, PARAMETER :: d_a = 1d0
-  DOUBLE PRECISION, PARAMETER :: d_E = 1d0
-  
-  !-------------------------------------
-  ! variables
-  !-------------------------------------
-  INTEGER :: clock
-  INTEGER :: i_z, i_alpha, i_energy, i_lambda, i_E, i_a, i_v_para, i_v_perp
-  INTEGER :: i_tau, i_p
-  DOUBLE PRECISION :: a, E
-  DOUBLE PRECISION :: z(0 : n_z)
-  DOUBLE PRECISION :: B(0 : n_z)
-  DOUBLE PRECISION :: rnd, count
-  CHARACTER(64)    :: file_distribution
-  CHARACTER(64)    :: file_alpha_energy
-  CHARACTER(64)    :: file_phase_space
-  CHARACTER(64)    :: file_initial_condition
-  CHARACTER(64)    :: file_bounce_period
-
-  !------------------------------
-  ! for distribution function
-  !------------------------------
-
-  DOUBLE PRECISION :: f, fp
-  DOUBLE PRECISION :: v
-  DOUBLE PRECISION :: p_para, p_perp
-  DOUBLE PRECISION :: v_para, v_perp
-  DOUBLE PRECISION :: v_0, v_1
-  DOUBLE PRECISION :: alpha, alpha_eq, energy ,phi
-  DOUBLE PRECISION :: gamma
-
-  DOUBLE PRECISION :: theta
-  DOUBLE PRECISION,PARAMETER :: kappa = 2d0
-  
-  
-  !-------------------------------------
-  ! for count
-  !-------------------------------------
-  INTEGER :: count_alpha_energy(0:89, 0:300)
-  INTEGER :: weight_count_alpha_energy(0:89, 0:300)
-  INTEGER :: count_phase_space(-n_phase_space:0, 0:n_phase_space)
-  INTEGER :: total_alpha_energy
-  INTEGER :: particle_num_for_plot_a_E
-  INTEGER :: phase_space_for_plot
-  INTEGER :: particle_num
-  DOUBLE PRECISION :: norm_tau_b
-  
-  !------------------------------
-  ! for initial  position
-  !------------------------------ 
-!  INTEGER,PARAMETER:: myrank = 20
-  DOUBLE PRECISION :: lambda, lambda1, lambda2
-  DOUBLE PRECISION,PARAMETER :: delta_t = 200
-  DOUBLE PRECISION :: r, B1, B2
-  DOUBLE PRECISION :: B0, alpha_eq0
-  DOUBLE PRECISION :: z_0, z_small, z_large
-  DOUBLE PRECISION :: z_p, z_p_1, z_p_2
-  DOUBLE PRECISION :: p(0:2)
-  DOUBLE PRECISION :: p_1(0:2), p_2(0:2)
-  DOUBLE PRECISION :: alpha_1, alpha_2
-  DOUBLE PRECISION :: tau_b
-  DOUBLE PRECISION :: t_2
-  DOUBLE PRECISION :: time
-  DOUBLE PRECISION :: B_mirror, z_mirror, n_z_mirror
-  DOUBLE PRECISION :: z_p_1_to_z_mirror, z_p_2_to_z_mirror
-
-  !------------------------------
-  ! for parallelization
-  !------------------------------ 
-
-  !INTEGER, PARAMETER :: n_parallelization = 100
-
-    !--MPI-------------------------------------------------------------------
-    include 'mpif.h'
-    INTEGER(KIND=4)  ierr,nprocs,myrank
-    call MPI_INIT(ierr)
-    call MPI_COMM_SIZE(MPI_COMM_WORLD,nprocs,ierr)
-    call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,ierr)
-    !--MPI-------------------------------------------------------------------
+   implicit none
 
 
-  !-------------------------------------------
-  !   initial setting
-  !-------------------------------------------
-  
-  do i_z = 0, n_z   
-     z(i_z) = DBLE(i_z) * d_z
-     call z_to_B(z(i_z), B(i_z))
-  end do
+   !--------------------------------------
+   !  constants_in_the_simulation
+   !--------------------------------------
 
-  call system_clock(count=clock) 
-  clock = 4267529
-  call sgrnd(clock)
-  write(*,*) clock
+   DOUBLE PRECISION, PARAMETER :: ave_p_para = 0.2d0
+   DOUBLE PRECISION, PARAMETER :: ave_p_perp = 0.2d0 
+   DOUBLE PRECISION, PARAMETER :: p_para_max = -0d0
+   DOUBLE PRECISION, PARAMETER :: p_para_min = -1d0
+   DOUBLE PRECISION, PARAMETER :: p_perp_max = 1d0
+   DOUBLE PRECISION, PARAMETER :: p_perp_min = 0d0
+   DOUBLE PRECISION, PARAMETER :: fmax = 10d0
+   DOUBLE PRECISION, PARAMETER :: fmin = 0d0
+   DOUBLE PRECISION, PARAMETER :: beta = 0.1
+   INTEGER, PARAMETER          :: N_p  = 2000000     !20000000
+   INTEGER, PARAMETER          :: n_phase_space = 100
+   INTEGER, PARAMETER          :: n_z = 3600
+   DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0  
+   DOUBLE PRECISION, PARAMETER :: d_t = 1.0d0
+   DOUBLE PRECISION, PARAMETER :: L_z = DBLE(n_z) * d_z 
+   DOUBLE PRECISION, PARAMETER :: d_a = 1d0
+   DOUBLE PRECISION, PARAMETER :: d_E = 1d0
+   
+   !-------------------------------------
+   ! variables
+   !-------------------------------------
+   INTEGER :: clock
+   INTEGER :: i_z, i_alpha, i_energy, i_lambda, i_E, i_a, i_v_para, i_v_perp
+   INTEGER :: i_tau, i_p
+   DOUBLE PRECISION :: a, E
+   DOUBLE PRECISION :: z(0 : n_z)
+   DOUBLE PRECISION :: B(0 : n_z)
+   DOUBLE PRECISION :: rnd, count
+   CHARACTER(64)    :: file_distribution
+   CHARACTER(64)    :: file_alpha_energy
+   CHARACTER(64)    :: file_phase_space
+   CHARACTER(64)    :: file_initial_condition
+   CHARACTER(64)    :: file_bounce_period
 
-  
-  !-------------------------------------------
-  ! decide distribution function
-  !------------------------------------------   
+   !------------------------------
+   ! for distribution function
+   !------------------------------
+
+   DOUBLE PRECISION :: f, fp
+   DOUBLE PRECISION :: v
+   DOUBLE PRECISION :: p_para, p_perp
+   DOUBLE PRECISION :: v_para, v_perp
+   DOUBLE PRECISION :: v_0, v_1
+   DOUBLE PRECISION :: alpha, alpha_eq, energy ,phi
+   DOUBLE PRECISION :: gamma
+
+   DOUBLE PRECISION :: theta
+   DOUBLE PRECISION,PARAMETER :: kappa = 2d0
+   
+
+   !-------------------------------------
+   ! for count
+   !-------------------------------------
+   INTEGER :: count_alpha_energy(0:89, 0:300)
+   INTEGER :: weight_count_alpha_energy(0:89, 0:300)
+   INTEGER :: count_phase_space(-n_phase_space:0, 0:n_phase_space)
+   INTEGER :: total_alpha_energy
+   INTEGER :: particle_num_for_plot_a_E
+   INTEGER :: phase_space_for_plot
+   INTEGER :: particle_num
+   DOUBLE PRECISION :: norm_tau_b
+   
+   !------------------------------
+   ! for initial  position
+   !------------------------------ 
+   !INTEGER,PARAMETER:: myrank = 20
+   DOUBLE PRECISION :: lambda, lambda1, lambda2
+   DOUBLE PRECISION,PARAMETER :: delta_t = 200
+   DOUBLE PRECISION :: r, B1, B2
+   DOUBLE PRECISION :: B0, alpha_eq0
+   DOUBLE PRECISION :: z_0, z_small, z_large
+   DOUBLE PRECISION :: z_p, z_p_1, z_p_2
+   DOUBLE PRECISION :: p(0:2)
+   DOUBLE PRECISION :: p_1(0:2), p_2(0:2)
+   DOUBLE PRECISION :: alpha_1, alpha_2
+   DOUBLE PRECISION :: tau_b
+   DOUBLE PRECISION :: t_2
+   DOUBLE PRECISION :: time
+   DOUBLE PRECISION :: B_mirror, z_mirror, n_z_mirror
+   DOUBLE PRECISION :: z_p_1_to_z_mirror, z_p_2_to_z_mirror
+
+   !------------------------------
+   ! for parallelization
+   !------------------------------ 
+
+   !INTEGER, PARAMETER :: n_parallelization = 100
+
+   !--MPI-------------------------------------------------------------------
+   include 'mpif.h'
+   INTEGER(KIND=4)  ierr,nprocs,myrank
+   call MPI_INIT(ierr)
+   call MPI_COMM_SIZE(MPI_COMM_WORLD,nprocs,ierr)
+   call MPI_COMM_RANK(MPI_COMM_WORLD,myrank,ierr)
+   !--MPI-------------------------------------------------------------------
+
+
+   !-------------------------------------------
+   !   initial setting
+   !-------------------------------------------
+   
+   do i_z = 0, n_z   
+      z(i_z) = DBLE(i_z) * d_z
+      call z_to_B(z(i_z), B(i_z))
+   end do
+
+   call system_clock(count=clock) 
+   clock = 4267529
+   call sgrnd(clock)
+   write(*,*) clock
+
+   
+   !-------------------------------------------
+   ! decide distribution function
+   !------------------------------------------   
    
    write(file_alpha_energy, '(A33)') 'distribution_alpha_energy_str.dat'
    write(file_phase_space, '(A32)') 'distribution_phase_space_str.dat'
@@ -138,7 +138,7 @@ program distribution_calculater
    count_phase_space = 0
    
    do while(count <= N_p)
-  
+   
       p_para = grnd() * (p_para_max - p_para_min) + p_para_min
       p_perp = grnd() * (p_perp_max - p_perp_min) + p_perp_min
       gamma  = DSQRT(1 + p_para**2 + p_perp**2)
@@ -147,13 +147,13 @@ program distribution_calculater
       energy   = m_e * (gamma - 1.0)
       alpha_eq = pi - DATAN2(p_perp, p_para)
       fp     = grnd() * (fmax - fmin) + fmin
-
       
-!      f = 2d0*pi*v_perp* 1d0 /((2d0*pi)*ave_p_para*ave_p_perp**2) * DEXP(-p_para**2/(2d0*ave_p_para**2)) * &
-!           & 1d0/(1d0-beta)*(DEXP(-p_perp**2/(2d0*ave_p_perp**2))-DEXP(-p_perp**2/(2d0*beta*ave_p_perp**2)))
+
+      !f = 2d0*pi*v_perp* 1d0 /((2d0*pi)*ave_p_para*ave_p_perp**2) * DEXP(-p_para**2/(2d0*ave_p_para**2)) * &
+      !  & 1d0/(1d0-beta)*(DEXP(-p_perp**2/(2d0*ave_p_perp**2))-DEXP(-p_perp**2/(2d0*beta*ave_p_perp**2)))
 
       f = 2d0*pi*v_perp* 1d0 /((2d0*pi)**(3d0/2d0)*ave_p_para*ave_p_perp**2) &
-           * DEXP(-p_para**2/(2d0*ave_p_para**2)) * DEXP(-p_perp**2/(2d0*ave_p_perp**2))
+         & * DEXP(-p_para**2/(2d0*ave_p_para**2)) * DEXP(-p_perp**2/(2d0*ave_p_perp**2))
 
       ! f = 2d0*pi*v_perp* 1d0 /( pi*kappa*((ave_p_para/gamma)**2+(ave_p_perp/gamma)**2) )**(3d0/2d0) &
       !      * DGAMMA(kappa+1d0) / DGAMMA(kappa-1d0/2d0) &
@@ -164,7 +164,7 @@ program distribution_calculater
 
             
          count = count + 1
- !        write(10,'(6E15.7)') v_para, v_perp, phi, energy, alpha_eq
+         ! write(10,'(6E15.7)') v_para, v_perp, phi, energy, alpha_eq
             
          do i_a = 0, 89
             a = DBLE(i_a) * d_a
@@ -173,7 +173,7 @@ program distribution_calculater
                if (a <= alpha_eq*rad2deg .and. alpha_eq*rad2deg <= a+1) then
                   if (E <= energy .and. energy <= E+1) then
                      count_alpha_energy(i_a,i_E) = count_alpha_energy(i_a,i_E) + 1
-                    end if
+                  end if
                end if
             end do
          end do
@@ -254,128 +254,128 @@ program distribution_calculater
       a = DBLE(i_a) * d_a
 
       i_E = myrank  !do i_E = 0, 100
-         E = DBLE(i_E) * d_E
+      E = DBLE(i_E) * d_E
          
-         if (weight_count_alpha_energy(i_a,i_E) >= 1) then 
-            alpha_eq = (DBLE(a) + d_a/2d0)* deg2rad
-            energy   =  DBLE(E) + d_E/2d0
-            gamma    = energy / m_e + 1d0
-            v        = DSQRT(1d0 - 1d0/gamma**2)
-            v_para   = v * DCOS(alpha_eq)
-            v_perp   = v * DSIN(alpha_eq)
-            p(0)     = gamma * v_para
-            p(1)     = gamma * v_perp
-            p(2)     = 2 * pi * grnd()
-            tau_b    = 2d0 * r_eq / DSQRT(1d0 - 1d0/gamma**2) * (1.30d0 - 0.56d0 * DSIN(alpha_eq))
+      if (weight_count_alpha_energy(i_a,i_E) >= 1) then 
+         alpha_eq = (DBLE(a) + d_a/2d0)* deg2rad
+         energy   =  DBLE(E) + d_E/2d0
+         gamma    = energy / m_e + 1d0
+         v        = DSQRT(1d0 - 1d0/gamma**2)
+         v_para   = v * DCOS(alpha_eq)
+         v_perp   = v * DSIN(alpha_eq)
+         p(0)     = gamma * v_para
+         p(1)     = gamma * v_perp
+         p(2)     = 2 * pi * grnd()
+         tau_b    = 4d0 * r_eq / DSQRT(1d0 - 1d0/gamma**2) * (1.30d0 - 0.56d0 * DSIN(alpha_eq))
             
-            B_mirror = 1.0 / DSIN(alpha_eq)**2
-            do i_z = 1, n_z
-               z_mirror = z(i_z - 1)
-               n_z_mirror = i_z - 1
-               if (B(i_z) > B_mirror) exit
-            end do
+         B_mirror = 1.0 / DSIN(alpha_eq)**2
+         do i_z = 1, n_z
+            z_mirror = z(i_z - 1)
+            n_z_mirror = i_z - 1
+            if (B(i_z) > B_mirror) exit
+         end do
             
-            particle_num   = DBLE(weight_count_alpha_energy(i_a,i_E)) / (tau_b/delta_t) 
+         particle_num   = DBLE(weight_count_alpha_energy(i_a,i_E)) / (tau_b/delta_t) 
 
-            if (particle_num >= 1) then
+         if (particle_num >= 1) then
 
-               time = 0d0
-               z_p = 0d0
+            time = 0d0
+            z_p = 0d0
                
-               do i_tau = 1, 1000000
-                  
-                  t_2 = delta_t * i_tau
-                  
-                  if ( t_2 <= tau_b ) then
-                     
-                     z_p_1 = z_p
-                     p_1   = p
-                     
-                     do while(time <= t_2)
-                        call runge_kutta(z, z_p, p(0:2))
-                        z_p_2 = z_p
-                        p_2   = p
-                        time = time + 1d0 * d_t
-                     end do
-                     
-                     if ( z_p_1 < z_p_2 ) then 
-                        z_small = z_p_1
-                        z_large = z_p_2
-                     else
-                        z_small = z_p_2
-                        z_large = z_p_1                        
-                     end if
-                     
-                     call z_to_B(z_small, B1)
-                     call z_to_B(z_large, B2)                                  
-                        
-                     z_p_1_to_z_mirror = z_mirror - z_p_1
-                     z_p_2_to_z_mirror = z_mirror - z_p_2
-                     
-                     do i_p = 1, particle_num
-                        
-                        if (p_1(0) > 0 .and. p_2(0) > 0) then
-                           alpha_1  = DASIN(DSQRT(B1 * DSIN(alpha_eq)**2) )
-                           alpha_2  = DASIN(DSQRT(B2 * DSIN(alpha_eq)**2) )
-                           alpha  = grnd() * (alpha_2 - alpha_1) + alpha_1                             
-                           z_0    = grnd() * (z_p_2 - z_p_1) + z_p_1
-                        end if
-                        
-                        if (p_1(0) > 0 .and. p_2(0) < 0) then
-                           
-                           if (grnd() < (z_p_1_to_z_mirror)/(z_p_1_to_z_mirror + z_p_2_to_z_mirror)) then
-                              alpha_1  = DASIN(DSQRT(B1 * DSIN(alpha_eq)**2) )
-                              alpha_2  = pi / 2d0
-                              alpha  = grnd() * (alpha_2 - alpha_1) + alpha_1
-                              z_0    = grnd() * (z_mirror - z_p_1) + z_p_1
-                           else
-                              alpha_1  = pi / 2d0
-                              alpha_2  = pi - DASIN(DSQRT(B2 * DSIN(alpha_eq)**2) )
-                              alpha  = grnd() * (alpha_2 - alpha_1) + alpha_1
-                              z_0    = grnd() * (z_mirror - z_p_2) + z_p_2
-                           end if
-                           
-                        end if
-                        
-                        if (p_1(0) < 0 .and. p_2(0) < 0) then                                 
-                           alpha_1  = pi - DASIN(DSQRT(B1 * DSIN(alpha_eq)**2) )
-                           alpha_2  = pi - DASIN(DSQRT(B2 * DSIN(alpha_eq)**2) )
-                           alpha  = grnd() * (alpha_1 - alpha_2) +  alpha_2
-                           z_0    = grnd() * (z_p_1 - z_p_2) + z_p_2                              
-                        end if
+            do i_tau = 1, 1000000
 
-                        call z_to_B(z_0, B0)
-                        alpha_eq0 = DASIN(DSQRT(1d0 /B0 * DSIN(alpha)**2) )
-                        if (z_0 <= 8000d0 .and. alpha_eq0*rad2deg > 5.6d0) then
-                           energy   = grnd() * (DBLE(E) + 1d0 - DBLE(E)) +DBLE(E)
-                           gamma    = energy / m_e + 1d0
-                           v        = DSQRT(1d0 - 1d0/gamma**2)                         
-                           v_para = v * DCOS(alpha)
-                           v_perp = v * DSIN(alpha)
-                           p_para = gamma * v_para
-                           p_perp = gamma * v_perp
+               t_2 = delta_t * i_tau
+                  
+               if ( t_2 <= tau_b ) then
 
-                           if (alpha == alpha) then
-                              write(14,'(7E15.7)') energy, alpha*rad2deg, z_0, alpha_eq0*rad2deg
-                           end if
-                              
-                        end if
-                     end do
+                  z_p_1 = z_p
+                  p_1   = p
+                     
+                  do while(time <= t_2)
+                     call runge_kutta(z, z_p, p(0:2))
+                     z_p_2 = z_p
+                     p_2   = p
+                     time = time + 1d0 * d_t
+                  end do
+                     
+                  if ( z_p_1 < z_p_2 ) then 
+                     z_small = z_p_1
+                     z_large = z_p_2
+                  else
+                     z_small = z_p_2
+                     z_large = z_p_1                        
                   end if
-               end do
-            end if
+                     
+                  call z_to_B(z_small, B1)
+                  call z_to_B(z_large, B2)                                  
+                        
+                  z_p_1_to_z_mirror = z_mirror - z_p_1
+                  z_p_2_to_z_mirror = z_mirror - z_p_2
+                    
+                  do i_p = 1, particle_num
+
+                     if (p_1(0) > 0 .and. p_2(0) > 0) then
+                        alpha_1  = DASIN(DSQRT(B1 * DSIN(alpha_eq)**2) )
+                        alpha_2  = DASIN(DSQRT(B2 * DSIN(alpha_eq)**2) )
+                        alpha  = grnd() * (alpha_2 - alpha_1) + alpha_1                             
+                        z_0    = grnd() * (z_p_2 - z_p_1) + z_p_1
+                     end if
+                        
+                     if (p_1(0) > 0 .and. p_2(0) < 0) then
+
+                        if (grnd() < (z_p_1_to_z_mirror)/(z_p_1_to_z_mirror + z_p_2_to_z_mirror)) then
+                           alpha_1  = DASIN(DSQRT(B1 * DSIN(alpha_eq)**2) )
+                           alpha_2  = pi / 2d0
+                           alpha  = grnd() * (alpha_2 - alpha_1) + alpha_1
+                           z_0    = grnd() * (z_mirror - z_p_1) + z_p_1
+                        else
+                           alpha_1  = pi / 2d0
+                           alpha_2  = pi - DASIN(DSQRT(B2 * DSIN(alpha_eq)**2) )
+                           alpha  = grnd() * (alpha_2 - alpha_1) + alpha_1
+                           z_0    = grnd() * (z_mirror - z_p_2) + z_p_2
+                        end if
+                           
+                     end if
+                        
+                     if (p_1(0) < 0 .and. p_2(0) < 0) then                                 
+                        alpha_1  = pi - DASIN(DSQRT(B1 * DSIN(alpha_eq)**2) )
+                        alpha_2  = pi - DASIN(DSQRT(B2 * DSIN(alpha_eq)**2) )
+                        alpha  = grnd() * (alpha_1 - alpha_2) +  alpha_2
+                        z_0    = grnd() * (z_p_1 - z_p_2) + z_p_2                              
+                     end if
+
+                     call z_to_B(z_0, B0)
+                     alpha_eq0 = DASIN(DSQRT(1d0 /B0 * DSIN(alpha)**2) )
+                     if (z_0 <= 1800d0 .and. alpha_eq0*rad2deg > 5.6d0) then
+                        energy   = grnd() * (DBLE(E) + 1d0 - DBLE(E)) +DBLE(E)
+                        gamma    = energy / m_e + 1d0
+                        v        = DSQRT(1d0 - 1d0/gamma**2)                         
+                        v_para = v * DCOS(alpha)
+                        v_perp = v * DSIN(alpha)
+                        p_para = gamma * v_para
+                        p_perp = gamma * v_perp
+                        
+                        if (alpha == alpha) then
+                           write(14,'(7E15.7)') energy, alpha*rad2deg, z_0, alpha_eq0*rad2deg
+                        end if
+                              
+                     end if
+                  end do
+               end if
+            end do
          end if
+      end if
             
          
-         if (mod(i_a,5) == 0) then            
-            write(*,*) 'alpha', a, 'energy', myrank
-         end if
+      if (mod(i_a,5) == 0) then            
+         write(*,*) 'alpha', a, 'energy', myrank
+      end if
 
-      end do
+   end do
    
-      write(*,*) "end"
+   write(*,*) "end"
 
-      close(14)
+   close(14)
 
 !-MPI-------------------------------------------------------------------
    call MPI_FINALIZE(ierr)      

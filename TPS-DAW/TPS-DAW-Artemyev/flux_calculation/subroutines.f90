@@ -44,6 +44,10 @@ subroutine z_position_to_BB(z_position, BB)
   
     BB = DSQRT(1d0 + 3d0 * DSIN(MLAT)**2) / DCOS(MLAT)**6
 
+    if (isnan(BB)) then
+        print *, 'z_position_to_BB: BB = NaN'
+    end if
+
 end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
@@ -60,6 +64,10 @@ subroutine z_position_to_number_density(z_position, number_density)
     call z_position_to_radius_MLAT(z_position, radius, MLAT)
 
     number_density = number_density_eq * DCOS(MLAT)**(-5d0)
+
+    if (isnan(number_density)) then
+        print *, 'z_position_to_number_density: number_density = NaN'
+    end if
 
 end subroutine
 !
@@ -79,6 +87,10 @@ subroutine z_position_to_alfven_velocity(z_position, BB, alfven_velocity)
 
     alfven_velocity = BB / DSQRT(mu_0 * number_density * ion_mass)
 
+    if (isnan(alfven_velocity)) then
+        print *, 'z_position_to_alfven_velocity: alfven_velocity = NaN'
+    end if
+
 end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
@@ -97,6 +109,10 @@ subroutine z_position_to_ion_acoustic_gyroradius(z_position, BB, ion_acoustic_gy
 
     ion_acoustic_gyroradius = DSQRT((1.5d0 * Temperature_ion + 2d0 * Temperature_electron) * ion_mass) &
         & / charge / BB
+    
+    if (isnan(ion_acoustic_gyroradius)) then
+        print *, 'z_position_to_ion_acoustic_gyroradius: ion_acoustic_gyroradius = NaN'
+    end if
 
 end subroutine
 !
@@ -114,7 +130,15 @@ subroutine z_position_to_wave_frequency(z_position, wave_frequency)
 
     ss = z_position / r_eq
     CALL z_position_to_alfven_velocity(0d0, 1d0, alfven_velocity_eq)
-    wave_frequency = pi / z_position * alfven_velocity_eq
+    if (z_position == 0d0) then
+        wave_frequency = 0d0
+    else
+        wave_frequency = pi / z_position * alfven_velocity_eq
+    end if
+
+    if (isnan(wave_frequency)) then
+        print *, 'z_position_to_wave_frequency: wave_frequency = NaN'
+    end if
 
 end subroutine
 !
@@ -130,6 +154,10 @@ subroutine BB_to_wave_number_perp(BB, wave_number_perp)
     DOUBLE PRECISION, INTENT(OUT) :: wave_number_perp
 
     wave_number_perp = 2d0 * pi / wavelength_perp_eq * DSQRT(BB)
+
+    if (isnan(wave_number_perp)) then
+        print *, 'BB_to_wave_number_perp: wave_number_perp = NaN'
+    end if
 
 end subroutine
 !
@@ -151,6 +179,10 @@ subroutine z_position_to_wave_number_para(z_position, BB, wave_number_perp, wave
     wave_number_para = wave_frequency / alfven_velocity / &
         & DSQRT(1d0 + wave_number_perp**2d0 * ion_acoustic_gyroradius**2d0 * (1d0 + Temperature_ion / Temperature_electron))
 
+    if (isnan(wave_number_para)) then
+        print *, 'z_position_to_wave_number_para: wave_number_para = NaN'
+    end if
+
 end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
@@ -164,6 +196,10 @@ subroutine wave_number_para_to_wave_phase_initial(wave_number_para_pre, wave_num
     DOUBLE PRECISION, INTENT(OUT) :: wave_phase
 
     wave_phase = wave_phase_pre + (wave_number_para_pre + wave_number_para) / 2d0 * d_z
+
+    if (isnan(wave_phase)) then
+        print *, 'wave_number_para_to_wave_phase_initial: wave_phase = NaN'
+    end if
 
 end subroutine
 !
@@ -186,8 +222,16 @@ subroutine z_position_to_electrostatic_potential(z_position, BB, electrostatic_p
 
     g_function = 1d0 / 2d0 * (DTANH(360d0 / pi * DABS(MLAT) - 5d0) - DTANH(-5d0))
 
-    electrostatic_potential = - wave_number_perp**2d0 * ion_acoustic_gyroradius**2d0 &
+    if (isnan(g_function)) then
+        print *, 'z_position_to_electrostatic_potential: g_function = NaN'
+    end if
+
+    electrostatic_potential = - (wave_number_perp * ion_acoustic_gyroradius)**2d0 &
         & * (1d0 + Temperature_ion / Temperature_electron) * electrostatic_potential_0 * g_function
+
+    if (isnan(electrostatic_potential)) then
+        print *, 'z_position_to_electrostatic_potential: electrostatic_potential = NaN'
+    end if
     
 end subroutine
 !
@@ -202,6 +246,10 @@ subroutine time_to_wave_phase_update(wave_phase, wave_frequency)
     DOUBLE PRECISION, INTENT(INOUT) :: wave_phase
 
     wave_phase = wave_phase - wave_frequency * d_t
+
+    if (isnan(wave_phase)) then
+        print *, 'time_to_wave_phase_update: wave_phase = NaN'
+    end if
 
 end subroutine
 
@@ -246,6 +294,10 @@ subroutine z_particle_to_position(z_particle, z_position, i_z_left, i_z_right, r
 
     end if
 
+    if (isnan(ratio)) then
+        print *, 'z_particle_to_position: ratio = NaN'
+    end if
+
 end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
@@ -258,6 +310,10 @@ subroutine u_particle_to_gamma(u_particle, gamma)
     DOUBLE PRECISION, INTENT(OUT) :: gamma
 
     gamma = DSQRT(1d0 + u_particle(0)**2d0 + u_particle(1)**2d0)
+
+    if (isnan(gamma)) then
+        print *, 'u_particle_to_gamma: gamma = NaN'
+    end if
 
 end subroutine
 !
@@ -274,6 +330,10 @@ subroutine u_particle_to_v_particle_para(u_particle, v_particle_para)
     CALL u_particle_to_gamma(u_particle, gamma)
 
     v_particle_para = u_particle(0) / gamma
+
+    if (isnan(v_particle_para)) then
+        print *, 'u_particle_to_v_particle_para: v_particle_para = NaN'
+    end if
 
 end subroutine
 !
@@ -293,6 +353,10 @@ subroutine z_particle_to_dB_dz(z_particle, dB_dz)
 
     dB_dz = 3d0 * DSIN(MLAT) * (5d0 * DSIN(MLAT)**2d0 + 3d0) / DCOS(MLAT)**8d0 / (3d0 * DSIN(MLAT)**2d0 + 1d0) / r_eq
 
+    if (isnan(dB_dz)) then
+        print *, 'z_particle_to_dB_dz: dB_dz = NaN'
+    end if
+
 end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
@@ -305,6 +369,10 @@ subroutine electrostatic_potential_to_EE_wave_para(electrostatic_potential, wave
     DOUBLE PRECISION, INTENT(OUT) :: EE_wave_para
 
     EE_wave_para = - wave_number_para * electrostatic_potential * DCOS(wave_phase)
+
+    if (isnan(EE_wave_para)) then
+        print *, 'electrostatic_potential_to_EE_wave_para: EE_wave_para = NaN'
+    end if
 
 end subroutine
 !
@@ -347,6 +415,16 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
     force(0) = - u_p(1)**2d0 / 2d0 / BB_p / gamma * dB_dz_p + force_wave(0)
     force(1) = u_p(0) * u_p(1) / 2d0 / BB_p / gamma * dB_dz_p + force_wave(1)
     force(2) = charge * BB_p / gamma
+
+    if (isnan(force(0))) then
+        print *, 'Motion_of_Equation: force(0) = NaN'
+    end if
+    if (isnan(force(1))) then
+        print *, 'Motion_of_Equation: force(1) = NaN'
+    end if
+    if (isnan(force(2))) then
+        print *, 'Motion_of_Equation: force(2) = NaN'
+    end if
 
 end subroutine
 !
@@ -397,6 +475,19 @@ subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_par
 
     end if
 
+    if (isnan(u_particle(0))) then
+        print *, 'particle_update_by_runge_kutta: u_particle(0) = NaN'
+    end if
+    if (isnan(u_particle(1))) then
+        print *, 'particle_update_by_runge_kutta: u_particle(1) = NaN'
+    end if
+    if (isnan(u_particle(2))) then
+        print *, 'particle_update_by_runge_kutta: u_particle(2) = NaN'
+    end if
+    if (isnan(z_particle)) then
+        print *, 'particle_update_by_runge_kutta: z_particle = NaN'
+    end if
+
 end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
@@ -411,6 +502,10 @@ subroutine u_particle_to_energy(u_particle, energy)
 
     gamma = DSQRT(1 + u_particle(0)**2d0 + u_particle(1)**2d0)
     energy = gamma - 1d0
+
+    if (isnan(energy)) then
+        print *, 'u_particle_to_energy: energy = NaN'
+    end if
     
 end subroutine
 !
@@ -429,12 +524,31 @@ subroutine u_particle_to_alpha_eq(z_particle, u_particle, alpha_particle_eq)
     CALL z_position_to_BB(z_particle, BB_particle)
     alpha_particle_eq = ASIN(SIN(ATAN2(u_particle(1), u_particle(0))) / SQRT(BB_particle)) * rad2deg
 
+    if (isnan(alpha_particle_eq)) then
+        print *, 'u_particle_to_alpha_eq: alpha_particle_eq = NaN'
+    end if
+
 end subroutine
+!
+!!----------------------------------------------------------------------------------------------------------------------------------
+!
+subroutine write_time(string_in)
+    implicit none
+    CHARACTER(10) :: date1, date2, date3
+    CHARACTER(20) :: string_out
+    CHARACTER(20), OPTIONAL, INTENT(IN) :: string_in
 
-    
+    INTEGER       :: date_time(10)
 
+    if (present(string_in)) then
+        string_out = string_in
+    else
+        write(string_out, *) '     ' 
+    end if
 
-
-
-        
-
+    call date_and_time(date1, date2, date3, date_time)
+    write(*, '(I4, A1, I2.2, A1, I2.2, A1, I2.2, A1, I2.2, A1, I2.2, A1, A20)') &
+        & date_time(1), '/', date_time(2), '/', date_time(3), ' ',         &
+        & date_time(5), ':', date_time(6), ':', date_time(7), ' ',         &
+        & string_out
+end subroutine

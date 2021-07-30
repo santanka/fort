@@ -20,9 +20,9 @@ module variables
   DOUBLE PRECISION :: ion_acoustic_gyroradius(-n_z : n_z)
   DOUBLE PRECISION :: wave_phase(-n_z : n_z)
   DOUBLE PRECISION :: rnd
-  CHARACTER(64)    :: file_output, file_particle, file_wave, file_data
+  CHARACTER(64)    :: file_output, file_wave, file_data
   CHARACTER(64)    :: file_energy, file_alpha, file_distribution, file_phase_space
-  CHARACTER(64)    :: file_equator
+  CHARACTER(64)    :: file_equator, file_particle
   CHARACTER(20)    :: string
   CHARACTER(64) :: command  
   

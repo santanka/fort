@@ -1,8 +1,8 @@
 import numpy as np
 
 
-input_file = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-Artemyev/flux_calculation/particle_trajectory00'
-df = np.genfromtxt(input_file + '.dat')
+input_file = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-Artemyev/flux_calculation/myrank000/particle_trajectory01'
+df = np.genfromtxt(input_file + '.dat', filling_values=np.nan)
 
 line_count = 0
 for line in df:
@@ -31,6 +31,4 @@ for k in range(particle_number_len):
     np.savetxt(file_name[k], xx)
     xx = np.zeros((time, 8))
 
-
-print(file_name)
 

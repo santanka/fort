@@ -126,14 +126,15 @@ subroutine z_position_to_wave_frequency(z_position, wave_frequency)
 
     DOUBLE PRECISION, INTENT(IN) :: z_position
     DOUBLE PRECISION, INTENT(OUT) :: wave_frequency
-    DOUBLE PRECISION :: ss, alfven_velocity_eq
+    DOUBLE PRECISION :: ss, alfven_velocity, BB
 
     ss = z_position / r_eq
-    CALL z_position_to_alfven_velocity(0d0, 1d0, alfven_velocity_eq)
+    CALL z_position_to_BB(z_position, BB)
+    CALL z_position_to_alfven_velocity(0d0, 1d0, alfven_velocity)
     if (z_position == 0d0) then
         wave_frequency = 0d0
     else
-        wave_frequency = pi / z_position * alfven_velocity_eq
+        wave_frequency = pi / z_position * alfven_velocity
     end if
 
     if (isnan(wave_frequency)) then
@@ -463,16 +464,15 @@ subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_par
     u_particle(:) = u_particle(:) + (ff_RK_1(:) + 2d0 * ff_RK_2(:) + 2d0 * ff_RK_3(:) + ff_RK_4(:)) * d_t / 6d0
     z_particle = z_particle + (kk_RK_1 + 2d0 * kk_RK_2 + 2d0 * kk_RK_3 + kk_RK_4) * d_t / 6d0
     
-    if (z_particle <= 0d0) then
-        z_particle = - z_particle
-        u_particle(0) = DABS(u_particle(0))
-        equator_flag = 1
-
-    else if (z_particle >= L_z) then !mirror
+    if (z_particle >= L_z) then !mirror
         z_particle = L_z - (z_particle - L_z)
         u_particle(0) = - DABS(u_particle(0))
         edge_flag = 1
 
+    else if (z_particle <= -L_z) then
+        z_particle = -L_z - (z_particle + L_z)
+        u_particle(0) = - DABS(u_particle(0))
+        edge_flag = 1
     end if
 
     if (isnan(u_particle(0))) then

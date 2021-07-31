@@ -11,16 +11,16 @@ program distribution_calculater
    !  constants_in_the_simulation
    !--------------------------------------
 
-   DOUBLE PRECISION, PARAMETER :: ave_p_para = 0.2d0
-   DOUBLE PRECISION, PARAMETER :: ave_p_perp = 0.2d0 
-   DOUBLE PRECISION, PARAMETER :: p_para_max = -0d0
-   DOUBLE PRECISION, PARAMETER :: p_para_min = -1d0
-   DOUBLE PRECISION, PARAMETER :: p_perp_max = 1d0
+   DOUBLE PRECISION, PARAMETER :: ave_p_para = 0.035d0 !p =gamma*velocity
+   DOUBLE PRECISION, PARAMETER :: ave_p_perp = 0.035d0 
+   DOUBLE PRECISION, PARAMETER :: p_para_max = 0.05d0
+   DOUBLE PRECISION, PARAMETER :: p_para_min = -0.05d0
+   DOUBLE PRECISION, PARAMETER :: p_perp_max = 0.05d0
    DOUBLE PRECISION, PARAMETER :: p_perp_min = 0d0
    DOUBLE PRECISION, PARAMETER :: fmax = 10d0
    DOUBLE PRECISION, PARAMETER :: fmin = 0d0
    DOUBLE PRECISION, PARAMETER :: beta = 0.1
-   INTEGER, PARAMETER          :: N_p  = 2000000     !20000000
+   INTEGER, PARAMETER          :: N_p  = 2000000    !20000000
    INTEGER, PARAMETER          :: n_phase_space = 100
    INTEGER, PARAMETER          :: n_z = 3600
    DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0  

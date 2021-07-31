@@ -42,7 +42,7 @@ program main
                 &wave_phase(i_z -1), wave_phase(i_z))
         end if
 
-        print *, z_position(i_z), BB(i_z), wave_number_perp(i_z), wave_number_para(i_z), wave_phase(i_z)
+        !print *, z_position(i_z), BB(i_z), wave_number_perp(i_z), wave_number_para(i_z), wave_phase(i_z)
     end do !i_z
 
     !----------------------------
@@ -54,7 +54,8 @@ program main
     print *, clock
 
     !count the quantity of the data
-    WRITE(file_data, '(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
+    WRITE(file_data, '(A26)') 'initial_condition_test.csv'
+    !WRITE(file_data, '(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     OPEN (500, file = file_data)
     N_particle = 0
     
@@ -62,9 +63,9 @@ program main
     do !s
         i = i + 1
         read(500, *, end = 99)
-        if (mod(i, 100) == 0) then   
-            N_particle = N_particle + 1
-        end if
+        !if (mod(i, 100) == 0) then   
+        N_particle = N_particle + 1
+        !end if
     end do !s
 
     99 N_particle = N_particle - 2
@@ -84,7 +85,8 @@ program main
 
     
     !get the values
-    write(file_data,'(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
+    WRITE(file_data, '(A26)') 'initial_condition_test.csv'
+    !write(file_data,'(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     open (500, file = file_data)
   
     do i = 1, 1
@@ -92,25 +94,25 @@ program main
     end do !i
   
     do i = 1, N_particle
-        do j = 1, 99
-               READ(500, *, end = 98)
-        end do !j
+        !do j = 1, 99
+        !    READ(500, *, end = 98)
+        !end do !j
         read(500,*,iostat=ios) energy0(i), alpha0(i), z_particle(i), alpha_eq(i)
 
-        print *, i, myrank, energy0(i), alpha0(i), z_particle(i), alpha_eq(i)
+        !print *, i, myrank, energy0(i), alpha0(i), z_particle(i), alpha_eq(i)
        
         gamma0(i) = DBLE(energy0(i)) / m_e + 1d0
-        print *, i, myrank, energy0(i), gamma0(i)
+        !print *, i, myrank, energy0(i), gamma0(i)
 
         v_particle = SQRT(1d0 - 1d0/gamma0(i)**2)
         v_particle_para = v_particle * COS(alpha0(i)*deg2rad)
         v_particle_perp = v_particle * SIN(alpha0(i)*deg2rad)
-        print *, i, myrank, v_particle, v_particle_para, v_particle_perp
+        !print *, i, myrank, v_particle, v_particle_para, v_particle_perp
 
         u_particle(0, i) = gamma0(i) * v_particle_para
         u_particle(1, i) = gamma0(i) * v_particle_perp
         u_particle(2, i) = 2d0 * pi * grnd() 
-        print *, i, myrank, u_particle(:, i)
+        !print *, i, myrank, u_particle(:, i)
     end do !i
 
     98 CLOSE(500)
@@ -127,17 +129,17 @@ program main
     !-----------------------
     !initial setting of wave
     !-----------------------
-    if (wave_existance .eqv. .true.) then
+    if (wave_existance .eqv. .True.) then
         do i_z = -n_z, n_z
             CALL z_position_to_ion_acoustic_gyroradius(z_position(i_z), BB(i_z), ion_acoustic_gyroradius(i_z))
             CALL z_position_to_electrostatic_potential(z_position(i_z), BB(i_z), electrostatic_potential(i_z))
-            !print *, z_position(i_z), 'ep = ', electrostatic_potential(i_z), 'iag =', ion_acoustic_gyroradius(i_z) 
-            !print *, z_position(i_z), 'wnperp = ', wave_number_perp(i_z), 'Te = ', Temperature_electron
-            !print *, z_position(i_z), 'Ti = ', Temperature_ion, 'ep0 = ', electrostatic_potential_0
-            !print *, z_position(i_z), 'V_unit = ', V_unit
-            !print *, - (wave_number_perp(i_z) * ion_acoustic_gyroradius(i_z))**2d0 &
-            !    & * (1d0 + Temperature_ion / Temperature_electron) * electrostatic_potential_0
-            !print *
+            print *, z_position(i_z), 'ep = ', electrostatic_potential(i_z), 'iag =', ion_acoustic_gyroradius(i_z) 
+            print *, z_position(i_z), 'wnperp = ', wave_number_perp(i_z), 'Te = ', Temperature_electron
+            print *, z_position(i_z), 'Ti = ', Temperature_ion, 'ep0 = ', electrostatic_potential_0
+            print *, z_position(i_z), 'V_unit = ', V_unit
+            print *, z_position(i_z), 'wnpara = ', wave_number_para(i_z)
+            print *, z_position(i_z), 'Ewpara = ', - wave_number_para(i_z) * electrostatic_potential(i_z)
+            print *
         end do !i_z
     else
         electrostatic_potential = 0d0

@@ -85,7 +85,7 @@ subroutine z_position_to_alfven_velocity(z_position, BB, alfven_velocity)
 
     CALL z_position_to_number_density(z_position, number_density)
 
-    alfven_velocity = BB / DSQRT(mu_0 * number_density * ion_mass)
+    alfven_velocity = BB / DSQRT(mu_0_non_dimension * number_density * ion_mass)
 
     if (isnan(alfven_velocity)) then
         print *, 'z_position_to_alfven_velocity: alfven_velocity = NaN'
@@ -134,7 +134,7 @@ subroutine z_position_to_wave_frequency(z_position, wave_frequency)
     if (z_position == 0d0) then
         wave_frequency = 0d0
     else
-        wave_frequency = pi / z_position * alfven_velocity
+        wave_frequency = pi / abs(z_position) * alfven_velocity
     end if
 
     if (isnan(wave_frequency)) then
@@ -177,8 +177,12 @@ subroutine z_position_to_wave_number_para(z_position, BB, wave_number_perp, wave
     CALL z_position_to_alfven_velocity(z_position, BB, alfven_velocity)
     CALL z_position_to_ion_acoustic_gyroradius(z_position, BB, ion_acoustic_gyroradius)
 
-    wave_number_para = wave_frequency / alfven_velocity / &
-        & DSQRT(1d0 + wave_number_perp**2d0 * ion_acoustic_gyroradius**2d0 * (1d0 + Temperature_ion / Temperature_electron))
+    if (z_position == 0d0) then
+        wave_number_para = 0d0
+    else
+        wave_number_para = z_position / abs(z_position) * wave_frequency / alfven_velocity / &
+            & DSQRT(1d0 + wave_number_perp**2d0 * ion_acoustic_gyroradius**2d0 * (1d0 + Temperature_ion / Temperature_electron))
+    end if
 
     if (isnan(wave_number_para)) then
         print *, 'z_position_to_wave_number_para: wave_number_para = NaN'
@@ -379,7 +383,7 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
+subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force, wave_exist_parameter)
     !p -> particle
 
     use constant_parameter, only: pi
@@ -389,7 +393,7 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
     implicit none
 
     DOUBLE PRECISION, INTENT(IN) :: z_position(-n_z:n_z), wave_phase(-n_z:n_z)
-    DOUBLE PRECISION, INTENT(IN) :: z_p, u_p(0:2)
+    DOUBLE PRECISION, INTENT(IN) :: z_p, u_p(0:2), wave_exist_parameter
     DOUBLE PRECISION, INTENT(OUT) :: force(0:2)
     DOUBLE PRECISION :: gamma, ratio, BB_p, dB_dz_p, wave_number_perp_p, wave_number_para_p, force_wave(0:2)
     DOUBLE PRECISION :: electrostatic_potential_p, wave_phase_p, EE_wave_para_p
@@ -405,7 +409,8 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
 
     wave_phase_p = (1d0 - ratio) * wave_phase(i_z_left) + ratio * wave_phase(i_z_right)
 
-    CALL electrostatic_potential_to_EE_wave_para(electrostatic_potential_p, wave_number_para_p, wave_phase_p, EE_wave_para_p)
+    CALL electrostatic_potential_to_EE_wave_para(electrostatic_potential_p*wave_exist_parameter, wave_number_para_p, &
+        & wave_phase_p, EE_wave_para_p)
 
     !force(wave)
     force_wave(0) = - charge * EE_wave_para_p
@@ -431,13 +436,14 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_particle, equator_flag, edge_flag)
+subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_particle, equator_flag, edge_flag, &
+    & wave_exist_parameter)
 
     use constants_in_the_simulations, only: d_t, n_z, L_z, d_z
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_in(-n_z:n_z), wave_phase_in(-n_z:n_z)
+    DOUBLE PRECISION, INTENT(IN) :: z_in(-n_z:n_z), wave_phase_in(-n_z:n_z), wave_exist_parameter
     DOUBLE PRECISION, INTENT(INOUT) :: z_particle, u_particle(0:2)
     INTEGER, INTENT(OUT) :: equator_flag
     INTEGER, INTENT(OUT) :: edge_flag
@@ -449,16 +455,19 @@ subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_par
 
     !RK4
     CALL u_particle_to_v_particle_para(u_particle_s, kk_RK_1)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle, u_particle, ff_RK_1)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle, u_particle, ff_RK_1, wave_exist_parameter)
 
     CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_1 / 2d0 * d_t, kk_RK_2)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_1 / 2d0 * d_t, u_particle_s + ff_RK_1 / 2d0 * d_t, ff_RK_2)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_1 / 2d0 * d_t, u_particle_s + ff_RK_1 / 2d0 * d_t, ff_RK_2, &
+        & wave_exist_parameter)
 
     CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_2 / 2d0 * d_t, kk_RK_3)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_2 / 2d0 * d_t, u_particle_s + ff_RK_2 / 2d0 * d_t, ff_RK_3)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_2 / 2d0 * d_t, u_particle_s + ff_RK_2 / 2d0 * d_t, ff_RK_3, &
+    & wave_exist_parameter)
 
     CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_3 * d_t, kk_RK_4)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_3 * d_t, u_particle_s + ff_RK_3 * d_t, ff_RK_4)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_3 * d_t, u_particle_s + ff_RK_3 * d_t, ff_RK_4, &
+    & wave_exist_parameter)
 
     !particle update
     u_particle(:) = u_particle(:) + (ff_RK_1(:) + 2d0 * ff_RK_2(:) + 2d0 * ff_RK_3(:) + ff_RK_4(:)) * d_t / 6d0

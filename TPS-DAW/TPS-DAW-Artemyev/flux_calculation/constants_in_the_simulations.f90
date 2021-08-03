@@ -13,7 +13,7 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of simulation system
   !-------------------------------------
-  INTEGER, PARAMETER          :: n_time = 3600000  !80000 ! (10.9932 [s])
+  INTEGER, PARAMETER          :: n_time = 3600000  ! !80000 (10.9932 [s])
   INTEGER, PARAMETER          :: n_z = 3600 ! (n + 1) for dB_dz
   DOUBLE PRECISION, PARAMETER :: d_t = 1.0d0
   DOUBLE PRECISION, PARAMETER :: d_z = 0.5d0
@@ -24,7 +24,7 @@ module constants_in_the_simulations
   ! initial setting of wave
   !-------------------------------------
   DOUBLE PRECISION, PARAMETER :: wavelength_perp_eq = 150d3 / z_unit ![m]
-  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 2d2 / V_unit ![V]
+  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 1d0 / V_unit ![V]
 
   !!ïségóp
   !DOUBLE PRECISION, PARAMETER :: w_p = 4d0

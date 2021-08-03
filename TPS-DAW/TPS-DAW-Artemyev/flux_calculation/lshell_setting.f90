@@ -20,6 +20,7 @@ module lshell_setting
   DOUBLE PRECISION, PARAMETER :: V_unit = m * c**2d0 / q
   DOUBLE PRECISION, PARAMETER :: charge = q / e_unit
   DOUBLE PRECISION, PARAMETER :: ion_mass = 1.672621898d-27 / m
+  DOUBLE PRECISION, PARAMETER :: mu_0_non_dimension = mu_0 / m**2d0 / c * q**3d0 * B0_eq
 
   DOUBLE PRECISION, PARAMETER :: number_density_eq = 1390 * (3d0/L)**4.83d0 * 1d6 * z_unit**3d0
   DOUBLE PRECISION, PARAMETER :: Temperature_ion = 1000 * q / J_unit ![eV]

@@ -54,7 +54,7 @@ program main
     print *, clock
 
     !count the quantity of the data
-    WRITE(file_data, '(A26)') 'initial_condition_test.csv'
+    WRITE(file_data, '(A27)') 'initial_condition_test2.csv'
     !WRITE(file_data, '(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     OPEN (500, file = file_data)
     N_particle = 0
@@ -68,8 +68,8 @@ program main
         !end if
     end do !s
 
-    99 N_particle = N_particle - 2
-    close(500)
+    !99 N_particle = N_particle - 2
+    99 close(500)
 
     !allocate the capacity
     allocate(alpha0(1:N_particle))
@@ -85,13 +85,13 @@ program main
 
     
     !get the values
-    WRITE(file_data, '(A26)') 'initial_condition_test.csv'
+    WRITE(file_data, '(A27)') 'initial_condition_test2.csv'
     !write(file_data,'(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     open (500, file = file_data)
   
-    do i = 1, 1
-       read(500,*)
-    end do !i
+    !do i = 1, 1
+    !   read(500,*)
+    !end do !i
   
     do i = 1, N_particle
         !do j = 1, 99
@@ -130,9 +130,14 @@ program main
     !initial setting of wave
     !-----------------------
     if (wave_existance .eqv. .True.) then
+        WRITE(file_check, '(A23, I3.3, A19)') 'results_particle/myrank', myrank, '/potential_prof.dat'
+        OPEN(unit = 10, file = file_check)
         do i_z = -n_z, n_z
             CALL z_position_to_ion_acoustic_gyroradius(z_position(i_z), BB(i_z), ion_acoustic_gyroradius(i_z))
             CALL z_position_to_electrostatic_potential(z_position(i_z), BB(i_z), electrostatic_potential(i_z))
+            call electrostatic_potential_to_EE_wave_para(electrostatic_potential(i_z), wave_number_para(i_z), wave_phase(i_z), &
+                & EE_wave_para(i_z))
+            call z_position_to_alfven_velocity(z_position(i_z), BB(i_z), alfven_velocity(i_z))
             print *, z_position(i_z), 'ep = ', electrostatic_potential(i_z), 'iag =', ion_acoustic_gyroradius(i_z) 
             print *, z_position(i_z), 'wnperp = ', wave_number_perp(i_z), 'Te = ', Temperature_electron
             print *, z_position(i_z), 'Ti = ', Temperature_ion, 'ep0 = ', electrostatic_potential_0
@@ -140,9 +145,14 @@ program main
             print *, z_position(i_z), 'wnpara = ', wave_number_para(i_z)
             print *, z_position(i_z), 'Ewpara = ', - wave_number_para(i_z) * electrostatic_potential(i_z)
             print *
+            WRITE(10, '(9E15.7)') z_position(i_z), wave_number_para(i_z), wave_number_perp(i_z), wave_frequency(i_z), &
+                & wave_frequency(i_z)/wave_number_para(i_z), electrostatic_potential(i_z), EE_wave_para(i_z),&
+                & alfven_velocity(i_z), ion_acoustic_gyroradius(i_z)
         end do !i_z
+        wave_exist_parameter = 1d0
+        CLOSE(10)
     else
-        electrostatic_potential = 0d0
+        wave_exist_parameter = 0d0
     end if
     
     
@@ -206,7 +216,7 @@ program main
             end if
             
             CALL particle_update_by_runge_kutta(z_position, wave_phase, z_particle_sim, &
-                & u_particle_sim, equator_flag_sim, edge_flag_sim)
+                & u_particle_sim, equator_flag_sim, edge_flag_sim, wave_exist_parameter)
 
             if(mod(i_time, 100) == 1 .and. mod(i_particle, 100) == 1) then
                 print *, 'z_particle_sim = ', z_particle_sim, ', u_particle_sim(:) = ', u_particle_sim

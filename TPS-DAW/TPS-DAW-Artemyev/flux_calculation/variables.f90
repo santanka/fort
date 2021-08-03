@@ -22,7 +22,7 @@ module variables
   DOUBLE PRECISION :: rnd
   CHARACTER(64)    :: file_output, file_wave, file_data
   CHARACTER(64)    :: file_energy, file_alpha, file_distribution, file_phase_space
-  CHARACTER(64)    :: file_equator, file_particle
+  CHARACTER(64)    :: file_equator, file_particle, file_check
   CHARACTER(20)    :: string
   CHARACTER(64) :: command  
   
@@ -33,10 +33,11 @@ module variables
   DOUBLE PRECISION :: wave_frequency(-n_z : n_z)
   DOUBLE PRECISION :: wave_number_perp(-n_z : n_z)
   DOUBLE PRECISION :: wave_number_para(-n_z : n_z)
-  DOUBLE PRECISION :: electrostatic_potential(-n_z : n_z)
+  DOUBLE PRECISION :: electrostatic_potential(-n_z : n_z), EE_wave_para(-n_z : n_z)
   DOUBLE PRECISION :: V_g(-n_z : n_z), V_g_0
   DOUBLE PRECISION :: z_front, B_front, V_g_front
   DOUBLE PRECISION :: z_edge,  B_edge,  V_g_edge
+  DOUBLE PRECISION :: wave_exist_parameter
 
   !-------------------------------------
   ! for particle

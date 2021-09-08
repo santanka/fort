@@ -24,7 +24,7 @@ module constants_in_the_simulations
   ! initial setting of wave
   !-------------------------------------
   DOUBLE PRECISION, PARAMETER :: wavelength_perp_eq = 150d3 / z_unit ![m]
-  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 1d0 / V_unit ![V]
+  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 200d0 / V_unit ![V]
 
   !!ïségóp
   !DOUBLE PRECISION, PARAMETER :: w_p = 4d0

@@ -1,4 +1,4 @@
-;program SVC5
+program SVC5
 
 implicit none
 

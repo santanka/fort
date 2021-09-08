@@ -15,8 +15,7 @@ subroutine z_position_to_radius_MLAT(z_position, radius, MLAT)
         endif
 
         ff = r_eq * ((1d0 / 2d0) * DSIN(MLAT0) * DSQRT(3d0 * DSIN(MLAT0)**2 + 1d0) &
-            & + (1d0 / (2d0 * DSQRT(3d0))) * DLOG(DSQRT(3d0) * DSIN(MLAT0) &
-            & + DSQRT(3d0 * DSIN(MLAT0)**2 + 1d0))) &
+            & + (1d0 / (2d0 * DSQRT(3d0))) * ASINH(DSQRT(3d0) * DSIN(MLAT0))) &
             & - z_position
         gg = r_eq * DCOS(MLAT0) * DSQRT(3d0 * DSIN(MLAT0)**2 + 1d0)
 

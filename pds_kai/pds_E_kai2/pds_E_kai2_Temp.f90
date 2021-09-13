@@ -777,227 +777,260 @@ end subroutine bor
 
 !座標固定, vperp vs vparaの分布関数
 subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
- implicit none
- integer, intent(in) :: N, Z, kind, N1
- double precision, intent(in) :: ee
- double precision, dimension(N, kind), intent(in) :: UU
- double precision, dimension(kind, Z), intent(in) :: mu
- double precision, dimension(N), intent(in) :: lam, BB
- double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
- double precision, dimension(N, kind, Z), intent(in) :: amin, alim, amax
- integer, dimension(kind), intent(in) :: ijn
- character(len=128), intent(in) :: fileoption
- 
- double precision, dimension(Z/2) :: aL, aM
- double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff
- integer :: i, s, j, p, check
- character(len=128) :: filename, filename1, filename2
- double precision, parameter :: pi = 4.d0*atan(1.d0)
- 74 format(1PE25.15E3, 9(',', 1PE25.15E3))
- 
- 
- do s = 1, kind
-  !ファイル名作成
-  write(filename1, *) s
-  write(filename2, *) lam(N1) /pi*180.
-  filename = trim(adjustl(fileoption))//'s='//trim(adjustl(filename1))//'_MLT='//trim(adjustl(filename2))//'.csv'
-  print *, filename
+  implicit none
+  integer, intent(in) :: N, Z, kind, N1
+  double precision, intent(in) :: ee
+  double precision, dimension(N, kind), intent(in) :: UU
+  double precision, dimension(kind, Z), intent(in) :: mu
+  double precision, dimension(N), intent(in) :: lam, BB
+  double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
+  double precision, dimension(N, kind, Z), intent(in) :: amin, alim, amax
+  integer, dimension(kind), intent(in) :: ijn
+  character(len=128), intent(in) :: fileoption
   
-  open(62, file=filename)
-  if(N1 < ijn(s)) then
-    ww = -1.d0
-   else if(N1 >= ijn(s)) then
-    ww = 1.d0
-  endif
-  do j = 1, Z
-   if(mod(j, 3) == 1) then
-     check = 0 !amaxチェック
-     if(amin(N1, s, j) == 0.d0) then
-       aL(1) = 0.d0
-       do p = 2, Z/2
-        aL(p) = ww * alim(N1, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
-       enddo !p
-       if(amax(N1, s, j) /= 0.d0) then
-         check = 1 !amax実行
-         aM(1) = 0.d0
-         do p = 2, Z/2
-          aM(p) = -ww * amax(N1, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
-         enddo !p
-        else if(amax(N1, s, j) == 0.d0) then
-         aM = 0.d0
-       endif
-       
-      else if(amin(N1, s, j) /= 0.d0) then
-       do p = 1, Z/2
-        aL(p) = ww * amin(N1, s, j)*((alim(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z/2-1)))
-       enddo !p
-       if(amax(N1, s, j) > amin(N1, s, j)) then
-         check = 1 !amaxの積分を実行
-         do p = 1, Z/2
-          aM(p) = -ww * amin(N1, s, j)*((amax(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z/2-1)))
-         enddo !p
-        else if(amax(N1, s, j) <= amin(N1, s, j)) then
-         aM = 0.d0
-       endif
-     endif
-     
-     do p = 1, Z/2
-      if(mod(p, 3) == 2) then
-        ff = BB(i)/BB(ijn(s))*sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) & !BB(i)/BB(ijn(s))*を先頭に付与
-& *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
-        vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aL(p)**2.d0)*aL(p)/abs(aL(p))
-        vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
-        vparab = sqrt(2.d0/mass(s))*aL(p)
-        vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, j)/mass(s))
-        kpara = mass(s)*vpara**2.d0 /2.d0 /ee
-        kperp = mass(s)*vperp**2.d0 /2.d0 /ee
-        kall = (kpara+kperp*2.d0)/3.d0
-        
-        write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
-        
-      endif
-     enddo !p
-     
-     if(check == 1) then
-       do p = 1, Z/2
-        if(mod(p, 3) == 2) then
-          ff = BB(i)/BB(ijn(s))*sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) & !BB(i)/BB(ijn(s))*を先頭に付与
-& *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
-          vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aM(p)**2.d0)*aM(p)/abs(aM(p))
-          vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
-          vparab = sqrt(2.d0/mass(s))*aM(p)
-          vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, j)/mass(s))
-          kpara = mass(s)*vpara**2.d0 /2.d0 /ee
-          kperp = mass(s)*vperp**2.d0 /2.d0 /ee
-          kall = (kpara+kperp*2.d0)/3.d0
-          
-          write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
-          
-        endif
-       enddo !p
-     endif
-   endif
-  enddo !j
+  double precision, dimension(Z/2) :: aL, aM
+  double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+  integer :: i, s, j, p, check
+  character(len=128) :: filename, filename1, filename2
+  double precision, parameter :: pi = 4.d0*atan(1.d0)
+  74 format(1PE25.15E3, 9(',', 1PE25.15E3))
   
-  close(62)
   
- enddo !s
- 
- return
- 
-end subroutine disfun1
-
-
-!mu固定, MLT vs vparaの分布関数
-subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
- implicit none
- integer, intent(in) :: N, Z, kind, Z2
- double precision, intent(in) :: ee
- double precision, dimension(N, kind), intent(in) :: UU
- double precision, dimension(kind, Z), intent(in) :: mu
- double precision, dimension(N), intent(in) :: lam, BB
- double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
- double precision, dimension(N, kind, Z), intent(in) :: amin, alim, amax
- integer, dimension(kind), intent(in) :: ijn
- character(len=128), intent(in) :: fileoption
- 
- double precision, dimension(Z/2) :: aL, aM
- double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff
- integer :: i, s, j, p, check
- character(len=128) :: filename, filename1, filename2
- double precision, parameter :: pi = 4.d0*atan(1.d0)
- 74 format(1PE25.15E3, 9(',', 1PE25.15E3))
- 
- 
- do s = 1, kind
-  !ファイル名作成
-  write(filename1, *) s
-  write(filename2, *) mu(s, Z2)
-  filename = trim(adjustl(fileoption))//'s='//trim(adjustl(filename1))//'_mu='//trim(adjustl(filename2))//'.csv'
-  print *, filename
-  
-  open(62, file=filename)
-  
-  do i = 1, N
-   if(i < ijn(s)) then
+  do s = 1, kind
+   !ファイル名作成
+   write(filename1, *) s
+   write(filename2, *) lam(N1) /pi*180.
+   filename = trim(adjustl(fileoption))//'s='//trim(adjustl(filename1))//'_MLT='//trim(adjustl(filename2))//'.csv'
+   print *, filename
+   
+   open(62, file=filename)
+   if(N1 < ijn(s)) then
      ww = -1.d0
-    else if(i >= ijn(s)) then
+    else if(N1 >= ijn(s)) then
      ww = 1.d0
    endif
-   
-   check = 0 !amaxチェック
-   if(amin(i, s, Z2) == 0.d0) then
-     aL(1) = 0.d0
-     do p = 2, Z/2
-      aL(p) = ww * alim(i, s, Z2)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
-     enddo !p
-     if(amax(i, s, Z2) /= 0.d0) then
-       check = 1 !amax実行
-       aM(1) = 0.d0
-       do p = 2, Z/2
-        aM(p) = -ww * amax(i, s, Z2)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
-       enddo !p
-      else if(amax(i, s, Z2) == 0.d0) then
-       aM = 0.d0
-     endif
-     
-    else if(amin(i, s, Z2) /= 0.d0) then
-     do p = 1, Z/2
-      aL(p) = ww * amin(i, s, Z2)*((alim(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z/2-1)))
-     enddo !p
-     if(amax(i, s, Z2) > amin(i, s, Z2)) then
-       check = 1 !amaxの積分を実行
-       do p = 1, Z/2
-        aM(p) = -ww * amin(i, s, Z2)*((amax(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z/2-1)))
-       enddo !p
-      else if(amax(i, s, Z2) <= amin(i, s, Z2)) then
-       aM = 0.d0
-     endif
-   endif
-   
-   do p = 1, Z/2
-    if(mod(p, 3) == 2) then
-      ff = BB(i)/BB(ijn(s))*sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) & !BB(i)/BB(ijn(s))*を先頭に付与
-& *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
-      vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aL(p)**2.d0)*aL(p)/abs(aL(p))
-      vperp = sqrt(2.d0*BB(i)*mu(s, Z2)/mass(s))
-      vparab = sqrt(2.d0/mass(s))*aL(p)
-      vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, Z2)/mass(s))
-      kpara = mass(s)*vpara**2.d0 /2.d0 /ee
-      kperp = mass(s)*vperp**2.d0 /2.d0 /ee
-      kall = (kpara+kperp*2.d0)/3.d0
-      
-      write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
-      
-    endif
-   enddo !p
-   
-   if(check == 1) then
-     do p = 1, Z/2
-      if(mod(p, 3) == 2) then
-        ff = BB(i)/BB(ijn(s))*sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) & !BB(i)/BB(ijn(s))*を先頭に付与
-& *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
-        vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aM(p)**2.d0)*aM(p)/abs(aM(p))
-        vperp = sqrt(2.d0*BB(i)*mu(s, Z2)/mass(s))
-        vparab = sqrt(2.d0/mass(s))*aM(p)
-        vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, Z2)/mass(s))
-        kpara = mass(s)*vpara**2.d0 /2.d0 /ee
-        kperp = mass(s)*vperp**2.d0 /2.d0 /ee
-        kall = (kpara+kperp*2.d0)/3.d0
+   do j = 1, Z
+    if(mod(j, 3) == 1) then
+      check = 0 !amaxチェック
+      if(amin(N1, s, j) == 0.d0) then
+        aL(1) = 0.d0
+        do p = 2, Z/2
+         aL(p) = ww * alim(N1, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+        enddo !p
+        if(amax(N1, s, j) /= 0.d0) then
+          check = 1 !amax実行
+          aM(1) = 0.d0
+          do p = 2, Z/2
+           aM(p) = -ww * amax(N1, s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+          enddo !p
+         else if(amax(N1, s, j) == 0.d0) then
+          aM = 0.d0
+        endif
         
-        write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
-        
+       else if(amin(N1, s, j) /= 0.d0) then
+        do p = 1, Z/2
+         aL(p) = ww * amin(N1, s, j)*((alim(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z/2-1)))
+        enddo !p
+        if(amax(N1, s, j) > amin(N1, s, j)) then
+          check = 1 !amaxの積分を実行
+          do p = 1, Z/2
+           aM(p) = -ww * amin(N1, s, j)*((amax(N1, s, j)/amin(N1, s, j))**(dble(p-1)/dble(Z/2-1)))
+          enddo !p
+         else if(amax(N1, s, j) <= amin(N1, s, j)) then
+          aM = 0.d0
+        endif
       endif
-     enddo !p
-   endif
-  enddo !i
-  
-  close(62)
-  
- enddo !s
+      
+      do p = 1, Z/2
+       if(mod(p, 3) == 2) then
+         ffb = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+ & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
+         vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aL(p)**2.d0)*aL(p)/abs(aL(p))
+         vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
+         vparab = sqrt(2.d0/mass(s))*aL(p)
+         vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, j)/mass(s))
+         kpara = mass(s)*vpara**2.d0 /2.d0 /ee
+         kperp = mass(s)*vperp**2.d0 /2.d0 /ee
+         kall = (kpara+kperp*2.d0)/3.d0
+         
+         if(ffb /= 0.d0) then
+           if(vparab /= 0.d0) then
+             ffi = ffb * BB(ijn(s))/BB(N1) * abs(vpara/vparab)
+           else
+             ffi = 0d0
+           end if
  
- return
+           write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+         endif
+         
+       endif
+      enddo !p
+      
+      if(check == 1) then
+        do p = 1, Z/2
+         if(mod(p, 3) == 2) then
+           ffb = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+ & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
+           vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aM(p)**2.d0)*aM(p)/abs(aM(p))
+           vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
+           vparab = sqrt(2.d0/mass(s))*aM(p)
+           vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, j)/mass(s))
+           kpara = mass(s)*vpara**2.d0 /2.d0 /ee
+           kperp = mass(s)*vperp**2.d0 /2.d0 /ee
+           kall = (kpara+kperp*2.d0)/3.d0
+           
+           if(ffb /= 0.d0) then
+             if(vparab /= 0.d0) then
+               ffi = ffb * BB(ijn(s))/BB(N1) * abs(vpara/vparab)
+             else
+               ffi = 0d0
+             end if
+   
+             write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+           endif
+           
+         endif
+        enddo !p
+      endif
+    endif
+   enddo !j
+   
+   close(62)
+   
+  enddo !s
+  
+  return
+  
+ end subroutine disfun1
  
-end subroutine disfun2
-
-
+ 
+ !mu固定, MLT vs vparaの分布関数
+ subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
+  implicit none
+  integer, intent(in) :: N, Z, kind, Z2
+  double precision, intent(in) :: ee
+  double precision, dimension(N, kind), intent(in) :: UU
+  double precision, dimension(kind, Z), intent(in) :: mu
+  double precision, dimension(N), intent(in) :: lam, BB
+  double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
+  double precision, dimension(N, kind, Z), intent(in) :: amin, alim, amax
+  integer, dimension(kind), intent(in) :: ijn
+  character(len=128), intent(in) :: fileoption
+  
+  double precision, dimension(Z/2) :: aL, aM
+  double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+  integer :: i, s, j, p, check
+  character(len=128) :: filename, filename1, filename2
+  double precision, parameter :: pi = 4.d0*atan(1.d0)
+  74 format(1PE25.15E3, 9(',', 1PE25.15E3))
+  
+  
+  do s = 1, kind
+   !ファイル名作成
+   write(filename1, *) s
+   write(filename2, *) mu(s, Z2)
+   filename = trim(adjustl(fileoption))//'s='//trim(adjustl(filename1))//'_mu='//trim(adjustl(filename2))//'.csv'
+   print *, filename
+   
+   open(62, file=filename)
+   
+   do i = 1, N
+    if(i < ijn(s)) then
+      ww = -1.d0
+     else if(i >= ijn(s)) then
+      ww = 1.d0
+    endif
+    
+    check = 0 !amaxチェック
+    if(amin(i, s, Z2) == 0.d0) then
+      aL(1) = 0.d0
+      do p = 2, Z/2
+       aL(p) = ww * alim(i, s, Z2)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+      enddo !p
+      if(amax(i, s, Z2) /= 0.d0) then
+        check = 1 !amax実行
+        aM(1) = 0.d0
+        do p = 2, Z/2
+         aM(p) = -ww * amax(i, s, Z2)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+        enddo !p
+       else if(amax(i, s, Z2) == 0.d0) then
+        aM = 0.d0
+      endif
+      
+     else if(amin(i, s, Z2) /= 0.d0) then
+      do p = 1, Z/2
+       aL(p) = ww * amin(i, s, Z2)*((alim(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z/2-1)))
+      enddo !p
+      if(amax(i, s, Z2) > amin(i, s, Z2)) then
+        check = 1 !amaxの積分を実行
+        do p = 1, Z/2
+         aM(p) = -ww * amin(i, s, Z2)*((amax(i, s, Z2)/amin(i, s, Z2))**(dble(p-1)/dble(Z/2-1)))
+        enddo !p
+       else if(amax(i, s, Z2) <= amin(i, s, Z2)) then
+        aM = 0.d0
+      endif
+    endif
+    
+    do p = 1, Z/2
+     if(mod(p, 3) == 2) then
+       ffb = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+ & *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
+       vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aL(p)**2.d0)*aL(p)/abs(aL(p))
+       vperp = sqrt(2.d0*BB(i)*mu(s, Z2)/mass(s))
+       vparab = sqrt(2.d0/mass(s))*aL(p)
+       vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, Z2)/mass(s))
+       kpara = mass(s)*vpara**2.d0 /2.d0 /ee
+       kperp = mass(s)*vperp**2.d0 /2.d0 /ee
+       kall = (kpara+kperp*2.d0)/3.d0
+       
+       if(ffb /= 0.d0) then
+         if(vparab /= 0.d0) then
+           ffi = ffb * BB(ijn(s))/BB(i) * abs(vpara/vparab)
+         else
+           ffi = 0d0
+         end if
+ 
+         write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+       endif
+       
+     endif
+    enddo !p
+    
+    if(check == 1) then
+      do p = 1, Z/2
+       if(mod(p, 3) == 2) then
+         ffb = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+ & *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
+         vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aM(p)**2.d0)*aM(p)/abs(aM(p))
+         vperp = sqrt(2.d0*BB(i)*mu(s, Z2)/mass(s))
+         vparab = sqrt(2.d0/mass(s))*aM(p)
+         vperpb = sqrt(2.d0*BB(ijn(s))*mu(s, Z2)/mass(s))
+         kpara = mass(s)*vpara**2.d0 /2.d0 /ee
+         kperp = mass(s)*vperp**2.d0 /2.d0 /ee
+         kall = (kpara+kperp*2.d0)/3.d0
+         
+         if(ffb /= 0.d0) then
+           if(vparab /= 0.d0) then
+             ffi = ffb * BB(ijn(s))/BB(i) * abs(vpara/vparab)
+           else
+             ffi = 0d0
+           end if
+ 
+           write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+         endif
+         
+       endif
+      enddo !p
+    endif
+   enddo !i
+   
+   close(62)
+   
+  enddo !s
+  
+  return
+  
+ end subroutine disfun2
+ 
+ 
+ 

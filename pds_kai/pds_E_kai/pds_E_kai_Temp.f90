@@ -33,7 +33,7 @@ double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !minファイルの導入
 integer, parameter :: kind = 12
-character(len=128) :: filemin = 'pds_E_kai_4_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_3_min.csv'
 double precision :: cvn !収束値
 double precision, dimension(N) :: lam !MLT
 double precision, dimension(N) :: ss !磁力線上の座標
@@ -89,7 +89,7 @@ double precision, dimension(N) :: ske !電子慣性長
 
 
 !保存ファイル
-character(len=128) :: fileall = 'pds_E_kai_4_all.csv'
+character(len=128) :: fileall = 'pds_E_kai_3_all.csv'
 !!lam(1), ss(2), BB(3), Phi(4), nd(5:kind+4), rhod(kind+5), rhop(kind+6), cvg(kind+7), VA(kind+8:kind+10),
 !!Vpara(kind+11:2*kind+10), Pperp(2*kind+11:3*kind+10), Ppara(3*kind+11:4*kind+10), PP(4*kind+11:5*kind+10),
 !!Pperpall(5*kind+11), Pparaall(5*kind+12), PPall(5*kind+13), Pperpalli(5*kind+14), Pparaalli(5*kind+15), PPalli(5*kind+16),
@@ -101,8 +101,8 @@ character(len=128) :: fileall = 'pds_E_kai_4_all.csv'
 integer, parameter :: channel1 = 1 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
 integer, parameter :: N1 = 129
 integer, parameter :: channel2 = 1 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: Z2 = 1
-character(len=128) :: fileoption = 'pds_E_kai_4_disfun_'
+integer, parameter :: Z2 = 300
+character(len=128) :: fileoption = 'pds_E_kai_3_disfun_'
 
 
 !/////データ抽出/////
@@ -188,12 +188,12 @@ close(50)
 
 !座標固定, vperp vs vparaの分布関数
 if(channel1 == 1) then
-  call disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
+  call disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
 endif
 
 !mu固定, MLT vs vparaの分布関数
 if(channel2 == 1) then
-  call disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
+  call disfun2(N, Z, kind, Z2, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
 endif
 
 
@@ -776,11 +776,11 @@ end subroutine bor
 
 
 !座標固定, vperp vs vparaの分布関数
-subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
+subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
  implicit none
  integer, intent(in) :: N, Z, kind, N1
  double precision, intent(in) :: ee
- double precision, dimension(N, kind), intent(in) :: UU
+ double precision, dimension(N, kind), intent(in) :: UU, nd
  double precision, dimension(kind, Z), intent(in) :: mu
  double precision, dimension(N), intent(in) :: lam, BB
  double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
@@ -789,7 +789,7 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
  character(len=128), intent(in) :: fileoption
  
  double precision, dimension(Z/2) :: aL, aM
- double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff
+ double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
  integer :: i, s, j, p, check
  character(len=128) :: filename, filename1, filename2
  double precision, parameter :: pi = 4.d0*atan(1.d0)
@@ -810,7 +810,7 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
     ww = 1.d0
   endif
   do j = 1, Z
-   if(mod(j, 3) == 1) then
+   !if(mod(j, 3) == 1) then
      check = 0 !amaxチェック
      if(amin(N1, s, j) == 0.d0) then
        aL(1) = 0.d0
@@ -842,8 +842,8 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
      endif
      
      do p = 1, Z/2
-      if(mod(p, 3) == 2) then
-        ff = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+      !if(mod(p, 3) == 2) then
+        ffb = sig(s)/nd(N1, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
 & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
         vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aL(p)**2.d0)*aL(p)/abs(aL(p))
         vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
@@ -853,15 +853,18 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
         kperp = mass(s)*vperp**2.d0 /2.d0 /ee
         kall = (kpara+kperp*2.d0)/3.d0
         
-        write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
+        if(ffb /= 0.d0 .and. vpara == vpara .and. vpara /= 0.d0 .and. vparab /= 0.d0) then
+          ffi = ffb * BB(ijn(s))/BB(N1) * abs(vpara/vparab)
+          write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+        endif
         
-      endif
+      !endif
      enddo !p
      
      if(check == 1) then
        do p = 1, Z/2
-        if(mod(p, 3) == 2) then
-          ff = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+        !if(mod(p, 3) == 2) then
+          ffb = sig(s)/nd(N1, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
 & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
           vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aM(p)**2.d0)*aM(p)/abs(aM(p))
           vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
@@ -871,12 +874,15 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
           kperp = mass(s)*vperp**2.d0 /2.d0 /ee
           kall = (kpara+kperp*2.d0)/3.d0
           
-          write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
+          if(ffb /= 0.d0 .and. vpara == vpara .and. vpara /= 0.d0 .and. vparab /= 0.d0) then
+            ffi = ffb * BB(ijn(s))/BB(N1) * abs(vpara/vparab)
+            write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+          endif
           
-        endif
+        !endif
        enddo !p
      endif
-   endif
+   !endif
   enddo !j
   
   close(62)
@@ -889,11 +895,11 @@ end subroutine disfun1
 
 
 !mu固定, MLT vs vparaの分布関数
-subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
+subroutine disfun2(N, Z, kind, Z2, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, fileoption)
  implicit none
  integer, intent(in) :: N, Z, kind, Z2
  double precision, intent(in) :: ee
- double precision, dimension(N, kind), intent(in) :: UU
+ double precision, dimension(N, kind), intent(in) :: UU, nd
  double precision, dimension(kind, Z), intent(in) :: mu
  double precision, dimension(N), intent(in) :: lam, BB
  double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
@@ -902,7 +908,7 @@ subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
  character(len=128), intent(in) :: fileoption
  
  double precision, dimension(Z/2) :: aL, aM
- double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff
+ double precision :: a, ww, vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
  integer :: i, s, j, p, check
  character(len=128) :: filename, filename1, filename2
  double precision, parameter :: pi = 4.d0*atan(1.d0)
@@ -956,8 +962,8 @@ subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
    endif
    
    do p = 1, Z/2
-    if(mod(p, 3) == 2) then
-      ff = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+    !if(mod(p, 3) == 2) then
+      ffb = sig(s)/nd(i, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
 & *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
       vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aL(p)**2.d0)*aL(p)/abs(aL(p))
       vperp = sqrt(2.d0*BB(i)*mu(s, Z2)/mass(s))
@@ -967,15 +973,18 @@ subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
       kperp = mass(s)*vperp**2.d0 /2.d0 /ee
       kall = (kpara+kperp*2.d0)/3.d0
       
-      write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
+      if(ffb /= 0.d0 .and. vpara == vpara .and. vpara /= 0.d0 .and. vparab /= 0.d0) then
+        ffi = ffb * BB(ijn(s))/BB(i) * abs(vpara/vparab)
+        write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+      endif
       
-    endif
+    !endif
    enddo !p
    
    if(check == 1) then
      do p = 1, Z/2
-      if(mod(p, 3) == 2) then
-        ff = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+      !if(mod(p, 3) == 2) then
+        ffb = sig(s)/nd(i, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
 & *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
         vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aM(p)**2.d0)*aM(p)/abs(aM(p))
         vperp = sqrt(2.d0*BB(i)*mu(s, Z2)/mass(s))
@@ -985,9 +994,12 @@ subroutine disfun2(N, Z, kind, Z2, ee, UU, mu, lam, BB, mass, Tpara, Tperp, sig,
         kperp = mass(s)*vperp**2.d0 /2.d0 /ee
         kall = (kpara+kperp*2.d0)/3.d0
         
-        write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ff, 2*pi*vperp*ff
+        if(ffb /= 0.d0 .and. vpara == vpara .and. vpara /= 0.d0 .and. vparab /= 0.d0) then
+          ffi = ffb * BB(ijn(s))/BB(i) * abs(vpara/vparab)
+          write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
+        endif
         
-      endif
+      !endif
      enddo !p
    endif
   enddo !i

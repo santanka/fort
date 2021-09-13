@@ -8,9 +8,9 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_initialMatsuda/pds_J_kai_initialMatsuda_cvnminpoint_62-2_all.csv", delimiter=',', unpack=True)
 
-channel = 10
+channel = 1
 RJ = 7.1492E+07
 LL = 5.84760 #11で使用
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:垂直圧力, 9:ベータ値(圧力形式)

@@ -828,7 +828,7 @@ subroutine CV(N, ch, rhov, num, cvg, cvn)
  
  do ud = 1, 3
   do i = 1, N
-   cvg(ud, i) = rhov(ud, i)**2.d0/nume(ud, i)/numi(ud, i)
+   cvg(ud, i) = rhov(ud, i)**2.d0/nume(ud, i)/nume(ud, i)     !/numi(ud, i)
    if(ud == 1 .and. i /= 1 .and. i /= N) cvn = cvn + cvg(ud, i)
    cvg(ud, i) = sqrt(cvg(ud, i))
   enddo !i

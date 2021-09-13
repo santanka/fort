@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 from matplotlib import mathtext
 mathtext.FontConstantsBase = mathtext.ComputerModernFontConstants
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_3_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_4_all.csv", delimiter=',', unpack=True)
 
-channel = 8
+channel = 1
 RE = 6371E3
 LL = 4 #8, 10で使用
 

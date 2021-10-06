@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 from matplotlib import mathtext
 mathtext.FontConstantsBase = mathtext.ComputerModernFontConstants
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_4_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=9/pds_E_kai_L=9_1_all.csv", delimiter=',', unpack=True)
 
-channel = 1
+channel = 12
 RE = 6371E3
-LL = 4 #8, 10で使用
+LL = 9 #8, 10で使用
 
 print(data[58, 254]/data[4, 254]/1.602176634E-19)
 print(data[62, 254]/data[8, 254]/1.602176634E-19)
@@ -22,7 +22,7 @@ print(data[58, 127]/data[4, 127]/1.602176634E-19)
 print(data[62, 127]/data[8, 127]/1.602176634E-19)
 
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:Ozhogin et al. model,
-#9:plasma beta, 10:概形図
+#9:plasma beta, 10:概形図, 11:Bwpara vs. B0 (Schekochihin et al., 2009) [phi = 200 V]
 
 if (channel == 1):
     x = data[0, :]
@@ -130,7 +130,7 @@ if (channel == 5):
     z = data[88, :]
     fig = plt.figure()
     plt.rcParams["font.size"] = 40
-    ax = fig.add_subplot(111, xlabel='S← MLT [degree] →N', ylabel='beta', yscale='log')
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='beta', yscale='log')
     ax.plot(x, y, c='orange', label='beta')
     ax.plot(x, z, c='dimgrey', label='me/mi', linestyle='-.')
     fig.suptitle('beta(ion, perpendicular)')
@@ -275,6 +275,59 @@ if (channel == 10):
     ax.grid()
     ax.set_axisbelow(True)
 
+if (channel == 11):
+    x = data[0, :]
+    x = np.rad2deg(x)
+    beta_i = data[84, :]
+    pressure_i = data[75, :]-data[68, :] #data[75, :] #data[68, :]
+    pressure_e = data[78, :]-data[69, :] #data[78, :] #data[69, :]
+    #n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
+    #n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :] + data[14, :]
+    n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
+    n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :]
+    #n_i = data[14, :]
+    ee = 1.602176634E-19
+    delta_B = beta_i/2. * (1 + pressure_e/pressure_i) * n_i*ee/pressure_i * 200. #200 [V]
+    fig = plt.figure()
+    plt.rcParams["font.size"] = 40
+    fig.suptitle(r'$\frac{\delta B_{\parallel}}{B_0} = \frac{\beta_i}{2} (1 + \frac{Z}{\tau}) \frac{Ze \varphi}{T_i}$')
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', yscale='log')
+    ax.plot(x, delta_B, linewidth='4', label=r'$\frac{\delta B_{\parallel}}{B_0}$')
+    #ax.plot(x, 1 + pressure_e/pressure_i, linewidth='4', label=r'$1 + \frac{Z}{\tau}$')
+    ax.plot(x, beta_i/2. *n_i*ee*200./pressure_i, linewidth='4', label=r'$\frac{\beta_i}{2} \frac{Ze \varphi}{T_i}$')
+    ax.plot(x, beta_i, linewidth='4', label=r'$\frac{\beta_i}{2}$')
+    ax.minorticks_on()
+    ax.grid(which="both")
+    ax.legend()
+
+if (channel == 12):
+    x = data[0, :]
+    x = np.rad2deg(x)
+    pressure_i = data[75, :]
+    pressure_i_2 = data[68, :]
+    pressure_i_3 = data[75, :]-data[68, :]
+    pressure_e = data[78, :]
+    n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
+    n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :] + data[14, :]
+    n_i_2 = data[14, :]
+    n_i_3 = n_i - n_i_2
+    n_e = data[8, :] + data[13, :] + data[15, :]
+    ee = 1.602176634E-19
+    T_i = pressure_i / n_i /ee
+    T_i_2 = pressure_i_2 / n_i_2 /ee
+    T_i_3 = pressure_i_3 / n_i_3 /ee
+    T_e = pressure_e / n_e /ee
+    fig = plt.figure()
+    plt.rcParams["font.size"] = 40
+    fig.suptitle(r'Temperature')
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='Temperature [eV]', yscale='log')
+    ax.plot(x, T_i, linewidth='4', label=r'$T_i$')
+    ax.plot(x, T_i_2, linewidth='4', label=r'$T_i2$')
+    ax.plot(x, T_i_3, linewidth='4', label=r'$T_i3$')
+    ax.plot(x, T_e, linewidth='4', label=r'$T_e$')
+    ax.minorticks_on()
+    ax.grid(which="both")
+    ax.legend()
 
 plt.tight_layout()
 plt.show()

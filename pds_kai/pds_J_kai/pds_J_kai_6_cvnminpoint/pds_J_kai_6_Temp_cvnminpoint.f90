@@ -101,7 +101,7 @@ character(len=128) :: fileall = 'pds_J_kai_6_cvnminpoint_all.csv'
 integer, parameter :: channel1 = 1 !À•WŒÅ’è, vperp vs vpara‚Ì•ª•zŠÖ”(0:off, 1:on)
 integer, parameter :: N1 = 69
 integer, parameter :: channel2 = 1 !muŒÅ’è, MLT vs vpara‚Ì•ª•zŠÖ”(0:off, 1:on)
-integer, parameter :: Z2 = 200
+integer, parameter :: Z2 = 2
 character(len=128) :: fileoption = 'pds_J_kai_6_cvnminpoint_disfun_'
 
 

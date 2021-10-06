@@ -16,7 +16,7 @@ plt.rcParams['text.usetex'] = True
 plt.rcParams["font.size"] = 50
 
 channel = 0 #0:比較なし, 1:1つと比較, 2:2つと比較
-data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_disfun_s=5_MLAT=-39.072641287423266.csv", delimiter=',', unpack=True)
+data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_disfun_s=1_MLAT=-39.072641287423266.csv", delimiter=',', unpack=True)
 vperp = data1[2][:]
 vpara = data1[1][:]
 ff = data1[9][:]

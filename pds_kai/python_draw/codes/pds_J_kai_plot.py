@@ -8,9 +8,9 @@ Created on Wed Feb  3 16:18:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_initialMatsuda/pds_J_kai_initialMatsuda_cvnminpoint_62-2_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_J_kai/pds_J_kai_6_cvnminpoint/pds_J_kai_6_cvnminpoint_all.csv", delimiter=',', unpack=True)
 
-channel = 1
+channel = 8
 RJ = 7.1492E+07
 LL = 5.84760 #11で使用
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:垂直圧力, 9:ベータ値(圧力形式)
@@ -191,21 +191,25 @@ if (channel == 7):
     x = np.rad2deg(x)
     y = data[40:50, :]*1.E9
     fig = plt.figure()
-    plt.rcParams["font.size"] = 40
-    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
-    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
-    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
-    ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
-    ax.plot(x, y[5, :], c='deepskyblue', label='O+(Io)', linestyle='dotted', linewidth='3')
-    ax.plot(x, y[6, :], c='green', label='S+(Io)', linestyle='dotted', linewidth='3')
-    ax.plot(x, y[7, :], c='lime', label='S2+(Io)', linestyle='solid', linewidth='3')
-    ax.plot(x, y[8, :], c='blue', label='cold e-(Io)', linestyle='dashdot', linewidth='3')
-    ax.plot(x, y[9, :], c='hotpink', label='hot e-(Io)', linestyle='dashdot', linewidth='3')
-    ax.grid()
-    ax.legend()
-    fig.suptitle('Parallel Pressure')
-    ax.tick_params(labelsize=25)
+    plt.rcParams["font.size"] = 50
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='parallel pressure [nPa]', yscale='log', ylim=(1.E-4, 1.E2)) 
+    ax.plot(x, y[0, :]+y[2, :], c='dimgrey', label=r'$\rm{H^+}$(Jupiter)', linestyle='solid', linewidth='4', alpha=0.7)
+    ax.plot(x, y[1, :]+y[3, :], c='blue', label=r'$\rm{e^-}$(Jupiter)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[4, :], c='purple', label=r'$\rm{H^+}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[5, :], c='orange', label=r'$\rm{O^+}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[6, :], c='green', label=r'$\rm{S^+}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[7, :], c='lime', label=r'$\rm{S^{2+}}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[8, :], c='deepskyblue', label=r'cold $\rm{e^-}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[9, :], c='hotpink', label=r'hot $\rm{e^-}$(Io)', linestyle='dotted', linewidth='4')
+    ax.minorticks_on()
+    ax.grid(which="both")
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0, fontsize=30)
+    #fig.suptitle('Parallel Pressure')
+    #ax.tick_params(labelsize=50)
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
+
+
+    
 
 
 if (channel == 8):
@@ -213,20 +217,21 @@ if (channel == 8):
     x = np.rad2deg(x)
     y = data[30:40, :]*1.E9
     fig = plt.figure()
-    plt.rcParams["font.size"] = 40
-    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='perpendicular pressure [nPa]', yscale='log', ylim=(1.E-6, 1.E2)) 
-    ax.plot(x, y[0, :]+y[2, :], c='orange', label='H+(Jupiter)', linestyle='solid', linewidth='3')
-    ax.plot(x, y[1, :]+y[3, :], c='purple', label='e-(Jupiter)', linestyle='dashdot', linewidth='3')
-    ax.plot(x, y[4, :], c='red', label='H+(Io)', linestyle='solid', linewidth='3')
-    ax.plot(x, y[5, :], c='deepskyblue', label='O+(Io)', linestyle='dotted', linewidth='3')
-    ax.plot(x, y[6, :], c='green', label='S+(Io)', linestyle='dotted', linewidth='3')
-    ax.plot(x, y[7, :], c='lime', label='S2+(Io)', linestyle='solid', linewidth='3')
-    ax.plot(x, y[8, :], c='blue', label='cold e-(Io)', linestyle='dashdot', linewidth='3')
-    ax.plot(x, y[9, :], c='hotpink', label='hot e-(Io)', linestyle='dashdot', linewidth='3')
-    ax.grid()
-    ax.legend()
-    fig.suptitle('Perpendicular Pressure')
-    ax.tick_params(labelsize=25)
+    plt.rcParams["font.size"] = 50
+    ax = fig.add_subplot(111, xlabel='S← MLAT [degree] →N', ylabel='perpendicular pressure [nPa]', yscale='log', ylim=(1.E-4, 1.E2)) 
+    ax.plot(x, y[0, :]+y[2, :], c='dimgrey', label=r'$\rm{H^+}$(Jupiter)', linestyle='solid', linewidth='4', alpha=0.7)
+    ax.plot(x, y[1, :]+y[3, :], c='blue', label=r'$\rm{e^-}$(Jupiter)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[4, :], c='purple', label=r'$\rm{H^+}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[5, :], c='orange', label=r'$\rm{O^+}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[6, :], c='green', label=r'$\rm{S^+}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[7, :], c='lime', label=r'$\rm{S^{2+}}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[8, :], c='deepskyblue', label=r'cold $\rm{e^-}$(Io)', linestyle='dotted', linewidth='4')
+    ax.plot(x, y[9, :], c='hotpink', label=r'hot $\rm{e^-}$(Io)', linestyle='dotted', linewidth='4')
+    ax.minorticks_on()
+    ax.grid(which="both")
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0, fontsize=30)
+    #fig.suptitle('Parallel Pressure')
+    #ax.tick_params(labelsize=50)
     plt.subplots_adjust(wspace=0.4, hspace=0.6)
 
 if (channel == 9):

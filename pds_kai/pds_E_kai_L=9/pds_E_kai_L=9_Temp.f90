@@ -32,7 +32,7 @@ double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !minファイルの導入
 integer, parameter :: kind = 12
-character(len=128) :: filemin = 'pds_E_kai_L=9_2_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_L=9_1_min.csv'
 double precision :: cvn !収束値
 double precision, dimension(N) :: lam !MLT
 double precision, dimension(N) :: ss !磁力線上の座標
@@ -85,23 +85,39 @@ double precision, dimension(N) :: lari !イオンLarmor半径
 double precision, dimension(N) :: lare !電子Larmor半径
 double precision, dimension(N) :: ski !イオン慣性長
 double precision, dimension(N) :: ske !電子慣性長
+double precision, dimension(N) :: nd_sum_H !H+合成数密度
+double precision, dimension(N) :: nd_sum_e !e-合成数密度
+double precision, dimension(N) :: Vpara_sum_H !H+合成平均流速
+double precision, dimension(N) :: Vpara_sum_e !e-合成平均流速
+double precision, dimension(N) :: Pperp_sum_H !H+合成圧力(perpendicular)
+double precision, dimension(N) :: Ppara_sum_H !H+合成圧力(parallel)
+double precision, dimension(N) :: Pall_sum_H !H+合成全圧
+double precision, dimension(N) :: Pperp_sum_e !e-合成圧力(perpendicular)
+double precision, dimension(N) :: Ppara_sum_e !e-合成圧力(parallel)
+double precision, dimension(N) :: Pall_sum_e !e-合成全圧
 
+!合成設定
+integer :: H_sum_kind(3) = (/ 1, 6, 11 /) !H+合成_種類
+integer :: e_sum_kind(3) = (/ 5, 10, 12 /) !e-合成_種類
 
 !保存ファイル
-character(len=128) :: fileall = 'pds_E_kai_L=9_2_all.csv'
+character(len=128) :: fileall = 'pds_E_kai_L=9_1_all.csv'
 !!lam(1), ss(2), BB(3), Phi(4), nd(5:kind+4), rhod(kind+5), rhop(kind+6), cvg(kind+7), VA(kind+8:kind+10),
 !!Vpara(kind+11:2*kind+10), Pperp(2*kind+11:3*kind+10), Ppara(3*kind+11:4*kind+10), PP(4*kind+11:5*kind+10),
 !!Pperpall(5*kind+11), Pparaall(5*kind+12), PPall(5*kind+13), Pperpalli(5*kind+14), Pparaalli(5*kind+15), PPalli(5*kind+16),
 !!Pperpalle(5*kind+17), Pparaalle(5*kind+18), PPalle(5*kind+19), betaperp(5*kind+20), betapara(5*kind+21), beta(5*kind+22),
 !!betaperpi(5*kind+23), betaparai(5*kind+24), betai(5*kind+25), betaperpe(5*kind+26), betaparae(5*kind+27), betae(5*kind+28),
 !!border(5*kind+29), lari(5*kind+30), lare(5*kind+31), ski(5*kind+32), ske(5*kind+33)
-92 format(1PE25.15E3, 92(',', 1PE25.15E3)) !5*kind+33
+!!nd_sum_H(5*kind+34), nd_sum_e(5*kind+35), Vpara_sum_H(5*kind+36), Vpara_sum_e(5*kind+37), Pperp_sum_H(5*kind+38), 
+!!Ppara_sum_H(5*kind+39), Pall_sum_H(5*kind+40), Pperp_sum_e(5*kind+41), Ppara_sum_e(5*kind+42), Pall_sum_e(5*kind+43)
+
+92 format(1PE25.15E3, 102(',', 1PE25.15E3)) !5*kind+43
 
 integer, parameter :: channel1 = 0 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
 integer, parameter :: N1 = 200
 integer, parameter :: channel2 = 0 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
 integer, parameter :: Z2 = 300
-character(len=128) :: fileoption = 'pds_E_kai_L=9_2_disfun_'
+character(len=128) :: fileoption = 'pds_E_kai_L=9_1_disfun_'
 
 
 !/////データ抽出/////
@@ -172,6 +188,20 @@ betae = 2.d0*mu0*PPalle/BB**2.d0
 !IAWとKAWの境界値&Larmor半径&慣性長
 call bor(N, kind, ep0, cc, BB, Pperpalli, Pperpalle, nd, mass, chr, border, lari, lare, ski, ske)
 
+!分布関数の合成
+!数密度
+call sum_nd(N, kind, 3, H_sum_kind, nd, nd_sum_H)
+call sum_nd(N, kind, 3, e_sum_kind, nd, nd_sum_e)
+call sum_ryusoku(N, kind, 3, H_sum_kind, nd_sum_H, nd, Vpara, Vpara_sum_H)
+call sum_ryusoku(N, kind, 3, e_sum_kind, nd_sum_e, nd, Vpara, Vpara_sum_e)
+call sum_pressure_parallel(N, Z, kind, 3, H_sum_kind, UU, Vpara_sum_H, mu, &
+  & BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, Ppara_sum_H)
+call sum_pressure_parallel(N, Z, kind, 3, e_sum_kind, UU, Vpara_sum_e, mu, &
+  & BB, mass, Tpara, Tperp, sig, amin, alim, amax, ijn, Ppara_sum_e)
+call sum_pressure_perpendicular(N, kind, 3, H_sum_kind, Pperp, Pperp_sum_H)
+call sum_pressure_perpendicular(N, kind, 3, e_sum_kind, Pperp, Pperp_sum_e)
+call sum_pressure_all(N, Ppara_sum_H, Pperp_sum_H, Pall_sum_H)
+call sum_pressure_all(N, Ppara_sum_e, Pperp_sum_e, Pall_sum_e)
 
 !ファイル化処理
 open(50, file = fileall)
@@ -179,7 +209,8 @@ do i = 1, N
  write(50, 92) lam(i), ss(i), BB(i), Phi(i), nd(i, :), rhod(i), rhop(i), cvg(i), VA(i, :), Vpara(i, :), Pperp(i, :), Ppara(i, :), &
 & PP(i, :), Pperpall(i), Pparaall(i), PPall(i), Pperpalli(i), Pparaalli(i), PPalli(i), Pperpalle(i), Pparaalle(i), PPalle(i), &
 & betaperp(i), betapara(i), beta(i), betaperpi(i), betaparai(i), betai(i), betaperpe(i), betaparae(i), betae(i), border(i), &
-& lari(i), lare(i), ski(i), ske(i)
+& lari(i), lare(i), ski(i), ske(i), nd_sum_H(i), nd_sum_e(i), Vpara_sum_H(i), Vpara_sum_e(i), Pperp_sum_H(i), Ppara_sum_H(i), &
+& Pall_sum_H(i), Pperp_sum_e(i), Ppara_sum_e(i), Pall_sum_e(i)
 enddo !i
 close(50)
 
@@ -772,6 +803,195 @@ subroutine bor(N, kind, ep0, cc, BB, Pperpalli, Pperpalle, nd, mass, chr, border
  return
  
 end subroutine bor
+
+
+!分布関数の合成-数密度
+subroutine sum_nd(N, kind, sum_number, sum_kind, nd, nd_sum)
+  implicit none
+  integer, intent(in) :: N, kind, sum_number
+  integer, dimension(sum_number), intent(in) :: sum_kind
+  double precision, dimension(N, kind), intent(in) :: nd
+  double precision, dimension(N), intent(out) :: nd_sum
+  integer :: s
+
+  nd_sum = 0
+
+  do s = 1, sum_number
+    nd_sum = nd_sum + nd(:, sum_kind(s))
+  end do !s
+
+  return
+
+end subroutine sum_nd
+
+!分布関数の合成-平均流速
+subroutine sum_ryusoku(N, kind, sum_number, sum_kind, nd_sum, nd, Vpara, Vpara_sum)
+  implicit none
+  integer, intent(in) :: N, kind, sum_number
+  integer, dimension(sum_number), intent(in) :: sum_kind
+  double precision, dimension(N), intent(in) :: nd_sum
+  double precision, dimension(N, kind), intent(in) :: nd, Vpara
+  double precision, dimension(N), intent(out) :: Vpara_sum
+  integer :: s, i
+
+  Vpara_sum = 0
+
+  do s = 1, sum_number
+    do i = 1, N
+      if(nd(i, sum_kind(s)) > 0.d0) then
+        Vpara_sum = Vpara_sum + nd(:, sum_kind(s)) * Vpara(:, sum_kind(s)) / nd_sum
+      end if
+    end do !i
+  end do !s
+
+  return
+
+end subroutine sum_ryusoku
+
+!分布関数の合成-圧力(parallel)
+subroutine sum_pressure_parallel(N, Z, kind, sum_number, sum_kind, UU, Vpara_sum, mu, BB, mass, Tpara, Tperp, sig, amin, &
+  & alim, amax, ijn, Ppara_sum)
+  implicit none
+  integer, intent(in) :: N, Z, kind, sum_number
+  integer, dimension(sum_number), intent(in) :: sum_kind
+  double precision, dimension(N, kind), intent(in) :: UU
+  double precision, dimension(N), intent(in) :: Vpara_sum, BB
+  double precision, dimension(kind, Z), intent(in) :: mu
+  double precision, dimension(kind), intent(in) :: mass, Tpara, Tperp, sig
+  double precision, dimension(N, kind, Z), intent(in) :: amin, alim, amax
+  integer, dimension(kind), intent(in) :: ijn
+  double precision, dimension(N), intent(out) :: Ppara_sum
+
+  double precision, dimension(N, kind, Z) :: EE
+  double precision, dimension(Z/2) :: aL, aM
+  double precision, dimension(Z) :: TH
+  double precision :: a, ww, thetaL, thetaM, nnn, LL1, LL2, LL3, LL4, MM1, MM2, MM3, MM4
+  integer :: i, s, j, p, check, kind_s
+  double precision, parameter :: pi = 4.d0*atan(1.d0)
+
+  Ppara_sum = 0
+
+  !エネルギーの和(UU+mu*BB)
+  do i = 1, N
+    do s = 1, kind
+      EE(i, s, :) = UU(i, s) + mu(s, :)*BB(i)
+    enddo !s
+  enddo !i
+
+  do i = 1, N
+    do s = 1, sum_number
+      kind_s = sum_kind(s)
+      TH = 0.d0
+      if(i < ijn(kind_s)) then
+        ww = -1.d0
+      else if(i >= ijn(kind_s)) then
+        ww = 1.d0
+      endif
+      do j = 1, Z
+        check = 0 !amaxの積分をするかのチェック
+        if(amin(i, kind_s, j) == 0.d0) then
+          aL(1) = 0.d0
+          do p = 2, Z/2
+            aL(p) = ww * alim(i, kind_s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+          enddo !p
+          if(amax(i, kind_s, j) /= 0.d0) then
+            check = 1 !amaxの積分を実行
+            aM(1) = 0.d0
+            do p = 2, Z/2
+              aM(p) = -ww * amax(i, kind_s, j)*1.d-8*(1.d8**(dble(p-2)/dble(Z/2-2)))
+            enddo !p
+          else if(amax(i, kind_s, j) == 0.d0) then
+            aM = 0.d0
+          endif
+          
+        else if(amin(i, kind_s, j) /= 0.d0) then
+          do p = 1, Z/2
+            aL(p) = ww * amin(i, kind_s, j)*((alim(i, kind_s, j)/amin(i, kind_s, j))**(dble(p-1)/dble(Z/2-1)))
+          enddo !p
+          if(amax(i, kind_s, j) > amin(i, kind_s, j)) then
+            check = 1 !amaxの積分を実行
+            do p = 1, Z/2
+              aM(p) = -ww * amin(i, kind_s, j)*((amax(i, kind_s, j)/amin(i, kind_s, j))**(dble(p-1)/dble(Z/2-1)))
+            enddo !p
+          else if(amax(i, kind_s, j) <= amin(i, kind_s, j)) then
+            aM = 0.d0
+          endif
+        endif
+        
+        
+        thetaL = 0.d0
+        thetaM = 0.d0
+      
+        do p = 1, Z/2-1
+          LL1 = (sqrt(2.d0/mass(kind_s))*aL(p+1)/abs(aL(p+1))*sqrt(EE(ijn(kind_s), kind_s, j) - EE(i, kind_s, j)+(aL(p)**2.d0)) &
+            & - Vpara_sum(i))**2.d0
+          LL2 = (sqrt(2.d0/mass(kind_s))*aL(p+1)/abs(aL(p+1))*sqrt(EE(ijn(kind_s), kind_s, j) - EE(i, kind_s, j)+(aL(p+1)**2.d0)) &
+            & - Vpara_sum(i))**2.d0
+          LL3 = exp(-(aL(p)**2.d0)/Tpara(kind_s))
+          LL4 = exp(-(aL(p+1)**2.d0)/Tpara(kind_s))
+          if(LL1 > 0.d0 .and. LL2 > 0.d0 .and. LL3 >= 0.d0 .and. LL4 >= 0.d0) then
+            thetaL = thetaL + (LL1*LL3 + LL2*LL4) / 2.d0 * abs(aL(p+1)-aL(p))
+          endif
+          MM1 = (sqrt(2.d0/mass(kind_s))*aM(p+1)/abs(aM(p+1))*sqrt(EE(ijn(kind_s), kind_s, j) - EE(i, kind_s, j)+(aM(p)**2.d0)) &
+            & - Vpara_sum(i))**2.d0
+          MM2 = (sqrt(2.d0/mass(kind_s))*aM(p+1)/abs(aM(p+1))*sqrt(EE(ijn(kind_s), kind_s, j) - EE(i, kind_s, j)+(aM(p+1)**2.d0)) &
+            & - Vpara_sum(i))**2.d0
+          MM3 = exp(-(aM(p)**2.d0)/Tpara(kind_s))
+          MM4 = exp(-(aM(p+1)**2.d0)/Tpara(kind_s))
+          if(check == 1 .and. MM1 > 0.d0 .and. MM2 > 0.d0 .and. MM3 >= 0.d0 .and. MM4 >= 0.d0) then
+            thetaM = thetaM + (MM1*MM3 + MM2*MM4) / 2.d0 * abs(aM(p+1)-aM(p))
+          endif
+        enddo !p
+        
+        TH(j) = (thetaL + thetaM)*exp(-mu(kind_s, j)*BB(ijn(kind_s))/Tperp(kind_s))
+        
+      enddo !j
+      
+      nnn = 0.d0
+      
+      do j = 1, Z-1
+        nnn = nnn + (TH(j) + TH(j+1))/2.d0*(mu(kind_s, j+1)-mu(kind_s, j))
+      enddo !j
+      
+      Ppara_sum(i) = Ppara_sum(i) + sig(kind_s)*BB(ijn(kind_s))*mass(kind_s)/Tperp(kind_s)/sqrt(pi*Tpara(kind_s)) * nnn
+    enddo !s
+  enddo !i
+
+  return
+
+end subroutine sum_pressure_parallel
+
+!分布関数の合成-圧力(perpendicular)
+subroutine sum_pressure_perpendicular(N, kind, sum_number, sum_kind, Pperp, Pperp_sum)
+  implicit none
+  integer, intent(in) :: N, kind, sum_number
+  integer, dimension(sum_number), intent(in) :: sum_kind
+  double precision, dimension(N, kind), intent(in) :: Pperp
+  double precision, dimension(N), intent(out) :: Pperp_sum
+  integer :: s
+
+  Pperp_sum = 0
+
+  do s = 1, sum_number
+    Pperp_sum = Pperp_sum + Pperp(:, sum_kind(s))
+  end do !s
+
+  return
+
+end subroutine sum_pressure_perpendicular
+
+!分布関数の合成-全圧
+subroutine sum_pressure_all(N, Ppara_sum, Pperp_sum, Pall_sum)
+  implicit none
+  integer, intent(in) :: N
+  double precision, dimension(N), intent(in) :: Ppara_sum, Pperp_sum
+  double precision, dimension(N), intent(out) :: Pall_sum
+
+  Pall_sum = (2.d0 * Pperp_sum + Ppara_sum) / 3.d0
+
+  return
+
+end subroutine sum_pressure_all
 
 
 !座標固定, vperp vs vparaの分布関数

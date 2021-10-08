@@ -16,7 +16,7 @@ plt.rcParams.update({'mathtext.default': 'default', 'mathtext.fontset': 'stix'})
 plt.rcParams['text.usetex'] = True
 plt.rcParams["font.size"] = 50
 
-data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai/pds_E_kai_3_disfun_s=1_mu=3.2125976668201254E-016.csv", delimiter=',', unpack=True)
+data1 = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=9/pds_E_kai_L=9_2_disfun_s=1_mu=3.0884280832582411E-016.csv", delimiter=',', unpack=True)
 ss = data1[0][:]
 ss = np.rad2deg(ss)
 vperp = data1[2][:]
@@ -41,7 +41,7 @@ cm = plt.cm.get_cmap('turbo')
 
 ax.set_xlabel("S← MLAT [degree] →N")
 ax.set_ylabel("$v_{\parallel}$ [m/s] (+ : S→N, - : N→S)")
-plt.title("distribution function (scale=log10), $\mu$=3.212E-16")
+plt.title("distribution function (scale=log10), $\mu$=3.44E-18")
 #ax.yaxis.offsetText.set_fontsize(25)
 
 if np.trunc(max(ff))-10. > np.floor(min(ff)):
@@ -50,7 +50,7 @@ else:
     a = np.floor(np.nanmin(np.log10(ff)))
 
 mappable = ax.scatter(ss, vpara, c=np.log10(ff), vmin=a, vmax=np.trunc(np.nanmax(np.log10(ff))), cmap=cm, s=700, alpha=1)
-#ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y,_: f'{y*1E-5:.1f}'+ r'$\times 10^{5}$'))
+#ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y,_: f'{y*1E-6:.1f}'+ r'$\times 10^{6}$'))
 fig.colorbar(mappable, ax=ax)
 
 ax.minorticks_on()

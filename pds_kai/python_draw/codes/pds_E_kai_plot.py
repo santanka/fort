@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 from matplotlib import mathtext
 mathtext.FontConstantsBase = mathtext.ComputerModernFontConstants
 
-data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=9/pds_E_kai_L=9_1_all.csv", delimiter=',', unpack=True)
+data = np.genfromtxt(r"/home/satanka/Documents/fort/pds_kai/pds_E_kai_L=9/pds_E_kai_L=9_5_all.csv", delimiter=',', unpack=True)
 
-channel = 12
+channel = 2
 RE = 6371E3
 LL = 9 #8, 10で使用
 
@@ -22,7 +22,7 @@ print(data[58, 127]/data[4, 127]/1.602176634E-19)
 print(data[62, 127]/data[8, 127]/1.602176634E-19)
 
 #1:静電ポテンシャル, 2:数密度, 3:Alfven速度, 4:圧力, 5:ベータ値, 6:Larmor半径&慣性長, 7:平行圧力, 8:Ozhogin et al. model,
-#9:plasma beta, 10:概形図, 11:Bwpara vs. B0 (Schekochihin et al., 2009) [phi = 200 V]
+#9:plasma beta, 10:概形図, 11:Bwpara vs. B0 (Schekochihin et al., 2009) [phi = 200 V], 12:温度
 
 if (channel == 1):
     x = data[0, :]
@@ -60,7 +60,7 @@ if (channel == 2):
     #fig.suptitle('Number Density')
     ax.minorticks_on()
     ax.grid(which="both")
-    ax.legend()
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
     #ax.legend(bbox_to_anchor=(1, 0), loc='lower right', borderaxespad=0)
     
 
@@ -278,14 +278,16 @@ if (channel == 10):
 if (channel == 11):
     x = data[0, :]
     x = np.rad2deg(x)
-    beta_i = data[84, :]
-    pressure_i = data[75, :]-data[68, :] #data[75, :] #data[68, :]
-    pressure_e = data[78, :]-data[69, :] #data[78, :] #data[69, :]
+    #beta_i = data[84, :]
+    pressure_i = data[99, :] #data[75, :]-data[68, :] #data[75, :] #data[68, :]
+    pressure_e = data[102, :] #data[78, :]-data[69, :] #data[78, :] #data[69, :]
+    beta_i = 2 * 1.25663706143592E-06 * pressure_i / np.power(data[2, :], 2)
     #n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
     #n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :] + data[14, :]
-    n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
-    n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :]
+    #n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
+    #n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :]
     #n_i = data[14, :]
+    n_i = data[93, :]
     ee = 1.602176634E-19
     delta_B = beta_i/2. * (1 + pressure_e/pressure_i) * n_i*ee/pressure_i * 200. #200 [V]
     fig = plt.figure()
@@ -306,17 +308,29 @@ if (channel == 12):
     pressure_i = data[75, :]
     pressure_i_2 = data[68, :]
     pressure_i_3 = data[75, :]-data[68, :]
+    pressure_i_4 = data[99, :]
     pressure_e = data[78, :]
+    pressure_e_2 = data[69, :]
+    pressure_e_3 = data[78, :] - data[69, :]
+    pressure_e_4 = data[102, :]
     n_i = data[4, :] + data[5, :] + data[6, :] + data[7, :]
     n_i = n_i + data[9, :] + data[10, :] + data[11, :] + data[12, :] + data[14, :]
     n_i_2 = data[14, :]
     n_i_3 = n_i - n_i_2
+    n_i_4 = data[93, :]
     n_e = data[8, :] + data[13, :] + data[15, :]
+    n_e_2 = data[15, :]
+    n_e_3 = n_e - n_e_2
+    n_e_4 = data[94, :]
     ee = 1.602176634E-19
     T_i = pressure_i / n_i /ee
     T_i_2 = pressure_i_2 / n_i_2 /ee
     T_i_3 = pressure_i_3 / n_i_3 /ee
+    T_i_4 = pressure_i_4 / n_i_4 /ee
     T_e = pressure_e / n_e /ee
+    T_e_2 = pressure_e_2 / n_e_2 / ee
+    T_e_3 = pressure_e_3 / n_e_3 / ee
+    T_e_4 = pressure_e_4 / n_e_4 / ee
     fig = plt.figure()
     plt.rcParams["font.size"] = 40
     fig.suptitle(r'Temperature')
@@ -324,10 +338,14 @@ if (channel == 12):
     ax.plot(x, T_i, linewidth='4', label=r'$T_i$')
     ax.plot(x, T_i_2, linewidth='4', label=r'$T_i2$')
     ax.plot(x, T_i_3, linewidth='4', label=r'$T_i3$')
+    ax.plot(x, T_i_4, linewidth='4', label=r'$T_i4$')
     ax.plot(x, T_e, linewidth='4', label=r'$T_e$')
+    ax.plot(x, T_e_2, linewidth='4', label=r'$T_e2$')
+    ax.plot(x, T_e_3, linewidth='4', label=r'$T_e3$')
+    ax.plot(x, T_e_4, linewidth='4', label=r'$T_e4$')
     ax.minorticks_on()
     ax.grid(which="both")
-    ax.legend()
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0, fontsize=25)
 
 plt.tight_layout()
 plt.show()

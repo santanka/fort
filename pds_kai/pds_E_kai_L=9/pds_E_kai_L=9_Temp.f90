@@ -32,7 +32,7 @@ double precision, parameter :: Ls = 0 !衛星軌道のL値
 
 !minファイルの導入
 integer, parameter :: kind = 12
-character(len=128) :: filemin = 'pds_E_kai_L=9_1_min.csv'
+character(len=128) :: filemin = 'pds_E_kai_L=9_5_min.csv'
 double precision :: cvn !収束値
 double precision, dimension(N) :: lam !MLT
 double precision, dimension(N) :: ss !磁力線上の座標
@@ -101,7 +101,7 @@ integer :: H_sum_kind(3) = (/ 1, 6, 11 /) !H+合成_種類
 integer :: e_sum_kind(3) = (/ 5, 10, 12 /) !e-合成_種類
 
 !保存ファイル
-character(len=128) :: fileall = 'pds_E_kai_L=9_1_all.csv'
+character(len=128) :: fileall = 'pds_E_kai_L=9_5_all.csv'
 !!lam(1), ss(2), BB(3), Phi(4), nd(5:kind+4), rhod(kind+5), rhop(kind+6), cvg(kind+7), VA(kind+8:kind+10),
 !!Vpara(kind+11:2*kind+10), Pperp(2*kind+11:3*kind+10), Ppara(3*kind+11:4*kind+10), PP(4*kind+11:5*kind+10),
 !!Pperpall(5*kind+11), Pparaall(5*kind+12), PPall(5*kind+13), Pperpalli(5*kind+14), Pparaalli(5*kind+15), PPalli(5*kind+16),
@@ -114,10 +114,10 @@ character(len=128) :: fileall = 'pds_E_kai_L=9_1_all.csv'
 92 format(1PE25.15E3, 102(',', 1PE25.15E3)) !5*kind+43
 
 integer, parameter :: channel1 = 0 !座標固定, vperp vs vparaの分布関数(0:off, 1:on)
-integer, parameter :: N1 = 200
+integer, parameter :: N1 = 251
 integer, parameter :: channel2 = 0 !mu固定, MLT vs vparaの分布関数(0:off, 1:on)
 integer, parameter :: Z2 = 300
-character(len=128) :: fileoption = 'pds_E_kai_L=9_1_disfun_'
+character(len=128) :: fileoption = 'pds_E_kai_L=9_5_disfun_'
 
 
 !/////データ抽出/////
@@ -476,12 +476,20 @@ subroutine ryusoku(N, Z, kind, UU, nd, mu, BB, mass, Tpara, Tperp, sig, amin, al
    if(nd(i, s) == 0.d0) then
      Vpara(i, s) = sqrt(a) !NaNを代入
     else if(nd(i, s) /= 0.d0) then
-     TH = 0.d0
-     if(i < ijn(s)) then
-       ww = -1.d0
-      else if(i >= ijn(s)) then
-       ww = 1.d0
-     endif
+      TH = 0.d0
+      if(i < ijn(s)) then
+        ww = -1.d0
+      else if(i > ijn(s)) then
+        ww = 1.d0
+      else if(i == ijn(s)) then
+        if(ijn(s) == 1) then
+          ww = 1.d0
+        else if(ijn(s) == N) then
+          ww = -1.d0
+        else
+          ww = 1.d0
+        end if
+      endif
      do j = 1, Z
       check = 0 !amaxの積分をするかのチェック
       if(amin(i, s, j) == 0.d0) then
@@ -635,12 +643,20 @@ subroutine pressurepara(N, Z, kind, UU, Vpara, mu, BB, mass, Tpara, Tperp, sig, 
  
  do i = 1, N
   do s = 1, kind
-   TH = 0.d0
-   if(i < ijn(s)) then
-     ww = -1.d0
-    else if(i >= ijn(s)) then
-     ww = 1.d0
-   endif
+    TH = 0.d0
+    if(i < ijn(s)) then
+      ww = -1.d0
+    else if(i > ijn(s)) then
+      ww = 1.d0
+    else if(i == ijn(s)) then
+      if(ijn(s) == 1) then
+        ww = 1.d0
+      else if(ijn(s) == N) then
+        ww = -1.d0
+      else
+        ww = 1.d0
+      end if
+    endif
    do j = 1, Z
     check = 0 !amaxの積分をするかのチェック
     if(amin(i, s, j) == 0.d0) then
@@ -882,10 +898,18 @@ subroutine sum_pressure_parallel(N, Z, kind, sum_number, sum_kind, UU, Vpara_sum
     do s = 1, sum_number
       kind_s = sum_kind(s)
       TH = 0.d0
-      if(i < ijn(kind_s)) then
+      if(i < ijn(s)) then
         ww = -1.d0
-      else if(i >= ijn(kind_s)) then
+      else if(i > ijn(s)) then
         ww = 1.d0
+      else if(i == ijn(s)) then
+        if(ijn(s) == 1) then
+          ww = 1.d0
+        else if(ijn(s) == N) then
+          ww = -1.d0
+        else
+          ww = 1.d0
+        end if
       endif
       do j = 1, Z
         check = 0 !amaxの積分をするかのチェック
@@ -1023,13 +1047,21 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
    print *, filename
    
    open(62, file=filename)
-   if(N1 < ijn(s)) then
-     ww = -1.d0
-    else if(N1 >= ijn(s)) then
-     ww = 1.d0
-   endif
+    if(N1 < ijn(s)) then
+      ww = -1.d0
+    else if(N1 > ijn(s)) then
+      ww = 1.d0
+    else if(N1 == ijn(s)) then
+      if(ijn(s) == 1) then
+        ww = 1.d0
+      else if(ijn(s) == N) then
+        ww = -1.d0
+      else
+        ww = 1.d0
+      end if
+    endif
    do j = 1, Z
-    if(mod(j, 3) == 1) then
+    !if(mod(j, 3) == 1) then
       check = 0 !amaxチェック
       if(amin(N1, s, j) == 0.d0) then
         aL(1) = 0.d0
@@ -1061,9 +1093,9 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
       endif
       
       do p = 1, Z/2
-       if(mod(p, 3) == 2) then
-         ffb = sig(s)/nd(N1, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
- & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
+       !if(mod(p, 3) == 2) then
+         ffb = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+ & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s)) !/nd(N1, s)
          vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aL(p)**2.d0)*aL(p)/abs(aL(p))
          vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
          vparab = sqrt(2.d0/mass(s))*aL(p)
@@ -1082,14 +1114,14 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
            write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
          endif
          
-       endif
+       !endif
       enddo !p
       
       if(check == 1) then
         do p = 1, Z/2
-         if(mod(p, 3) == 2) then
-           ffb = sig(s)/nd(N1, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
- & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
+         !if(mod(p, 3) == 2) then
+           ffb = sig(s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
+ & *exp(-mu(s, j)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s)) !/nd(N1, s)
            vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(N1, s)+mu(s, j)*(BB(ijn(s))-BB(N1))+aM(p)**2.d0)*aM(p)/abs(aM(p))
            vperp = sqrt(2.d0*BB(N1)*mu(s, j)/mass(s))
            vparab = sqrt(2.d0/mass(s))*aM(p)
@@ -1108,10 +1140,10 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
              write(62, 74) lam(N1), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
            endif
            
-         endif
+         !endif
         enddo !p
       endif
-    endif
+    !endif
    enddo !j
    
    close(62)
@@ -1156,8 +1188,16 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
    do i = 1, N
     if(i < ijn(s)) then
       ww = -1.d0
-     else if(i >= ijn(s)) then
+    else if(i > ijn(s)) then
       ww = 1.d0
+    else if(i == ijn(s)) then
+      if(ijn(s) == 1) then
+        ww = 1.d0
+      else if(ijn(s) == N) then
+        ww = -1.d0
+      else
+        ww = 1.d0
+      end if
     endif
     
     check = 0 !amaxチェック
@@ -1191,7 +1231,7 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
     endif
     
     do p = 1, Z/2
-     if(mod(p, 3) == 2) then
+     !if(mod(p, 3) == 2) then
        ffb = sig(s)/nd(i, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
  & *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aL(p)**2.d0/Tpara(s))
        vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aL(p)**2.d0)*aL(p)/abs(aL(p))
@@ -1212,12 +1252,12 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
          write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
        endif
        
-     endif
+     !endif
     enddo !p
     
     if(check == 1) then
       do p = 1, Z/2
-       if(mod(p, 3) == 2) then
+       !if(mod(p, 3) == 2) then
          ffb = sig(s)/nd(i, s)*(mass(s)/2.d0/pi)**(3.d0/2.d0)/Tperp(s)/sqrt(Tpara(s)) &
  & *exp(-mu(s, Z2)*BB(ijn(s))/Tperp(s))*exp(-aM(p)**2.d0/Tpara(s))
          vpara = sqrt(2.d0/mass(s))*sqrt(UU(ijn(s), s)-UU(i, s)+mu(s, Z2)*(BB(ijn(s))-BB(i))+aM(p)**2.d0)*aM(p)/abs(aM(p))
@@ -1238,7 +1278,7 @@ subroutine disfun1(N, Z, kind, N1, ee, UU, nd, mu, lam, BB, mass, Tpara, Tperp, 
            write(62, 74) lam(i), vpara, vperp, vparab, vperpb, kpara, kperp, kall, ffb, ffi
          endif
          
-       endif
+       !endif
       enddo !p
     endif
    enddo !i

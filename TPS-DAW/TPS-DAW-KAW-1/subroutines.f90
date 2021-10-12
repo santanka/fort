@@ -12,6 +12,7 @@ subroutine z_position_to_radius_MLAT(z_position, radius, MLAT)
     do ii = 1, 1000000
         if (ii == 1000000) then
             print *, "Error!: solution is not found. z_position = ", z_position
+            print *, ff, gg, MLAT0, MLAT1
         endif
 
         ff = r_eq * ((1d0 / 2d0) * DSIN(MLAT0) * DSQRT(3d0 * DSIN(MLAT0)**2 + 1d0) &
@@ -20,7 +21,7 @@ subroutine z_position_to_radius_MLAT(z_position, radius, MLAT)
         gg = r_eq * DCOS(MLAT0) * DSQRT(3d0 * DSIN(MLAT0)**2 + 1d0)
 
         MLAT1 = MLAT0 - ff / gg
-        if (DABS(MLAT1 - MLAT0) <= 1d-5) exit
+        if (DABS(MLAT1 - MLAT0) <= 1d-4) exit
         MLAT0 = MLAT1
     end do !ii
 
@@ -51,12 +52,11 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_position_to_number_density(z_position, number_density)
+subroutine z_position_to_number_density(number_density)
     use constants_in_the_simulations
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_position
     DOUBLE PRECISION, INTENT(OUT) :: number_density
 
     number_density = number_density_eq
@@ -69,17 +69,17 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_position_to_alfven_velocity(z_position, BB, alfven_velocity)
+subroutine z_position_to_alfven_velocity(BB, alfven_velocity)
     use constants_in_the_simulations
     use lshell_setting
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_position, BB
+    DOUBLE PRECISION, INTENT(IN) :: BB
     DOUBLE PRECISION, INTENT(OUT) :: alfven_velocity
     DOUBLE PRECISION :: number_density
 
-    CALL z_position_to_number_density(z_position, number_density)
+    CALL z_position_to_number_density(number_density)
 
     alfven_velocity = BB / DSQRT(4d0 * pi * number_density * ion_mass)
 
@@ -91,17 +91,17 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_position_to_ion_Larmor_radius(z_position, BB, ion_Larmor_radius)
+subroutine z_position_to_ion_Larmor_radius(BB, ion_Larmor_radius)
     use constant_parameter
     use lshell_setting
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_position, BB
+    DOUBLE PRECISION, INTENT(IN) :: BB
     DOUBLE PRECISION, INTENT(OUT) :: ion_Larmor_radius
     DOUBLE PRECISION :: number_density
     
-    CALL z_position_to_number_density(z_position, number_density)
+    CALL z_position_to_number_density(number_density)
 
     ion_Larmor_radius = c_normal * SQRT(2d0 * ion_mass * Temperature_ion) / charge / BB
     
@@ -113,13 +113,12 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_position_to_wave_frequency(z_position, wave_frequency)
+subroutine z_position_to_wave_frequency(wave_frequency)
     use constant_parameter
     use lshell_setting
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_position
     DOUBLE PRECISION, INTENT(OUT) :: wave_frequency
 
     wave_frequency = 2d0 * pi / 2d0
@@ -132,17 +131,17 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_position_to_wave_number_perp(z_position, BB, wave_number_perp)
+subroutine z_position_to_wave_number_perp(BB, wave_number_perp)
     use constant_parameter
     use constants_in_the_simulations
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_position, BB
+    DOUBLE PRECISION, INTENT(IN) :: BB
     DOUBLE PRECISION, INTENT(OUT) :: wave_number_perp
     DOUBLE PRECISION :: ion_Larmor_radius
 
-    CALL z_position_to_ion_Larmor_radius(z_position, BB, ion_Larmor_radius)
+    CALL z_position_to_ion_Larmor_radius(BB, ion_Larmor_radius)
 
     wave_number_perp = 2d0 * pi / ion_Larmor_radius
 
@@ -154,16 +153,16 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_position_to_beta_ion(z_position, BB, beta_ion)
+subroutine z_position_to_beta_ion(BB, beta_ion)
     use lshell_setting
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_position, BB
+    DOUBLE PRECISION, INTENT(IN) :: BB
     DOUBLE PRECISION, INTENT(OUT) :: beta_ion
     DOUBLE PRECISION :: number_density
 
-    CALL z_position_to_number_density(z_position, number_density)
+    CALL z_position_to_number_density(number_density)
 
     beta_ion = 8d0 * number_density * Temperature_ion / BB**2d0
 
@@ -184,10 +183,10 @@ subroutine z_position_to_wave_number_para(z_position, BB, wave_number_perp, wave
     DOUBLE PRECISION, INTENT(OUT) :: wave_number_para
     DOUBLE PRECISION :: wave_frequency, alfven_velocity, ion_Larmor_radius, beta_ion
 
-    CALL z_position_to_wave_frequency(z_position, wave_frequency)
-    CALL z_position_to_alfven_velocity(z_position, BB, alfven_velocity)
-    CALL z_position_to_ion_Larmor_radius(z_position, BB, ion_Larmor_radius)
-    CALL z_position_to_beta_ion(z_position, BB, beta_ion)
+    CALL z_position_to_wave_frequency(wave_frequency)
+    CALL z_position_to_alfven_velocity(BB, alfven_velocity)
+    CALL z_position_to_ion_Larmor_radius(BB, ion_Larmor_radius)
+    CALL z_position_to_beta_ion(BB, beta_ion)
 
     if(z_position /= 0.d0) then
         wave_number_para = 1 / (wave_number_perp * ion_Larmor_radius) * wave_frequency / alfven_velocity &
@@ -408,8 +407,8 @@ subroutine electrostatic_potential_to_EE_wave_perp_perp(electrostatic_potential,
     DOUBLE PRECISION :: BB, beta_ion, ion_Larmor_radius, ion_gyrofrequency
 
     CALL z_position_to_BB(z_position, BB)
-    CALL z_position_to_beta_ion(z_position, BB, beta_ion)
-    CALL z_position_to_ion_Larmor_radius(z_position, BB, ion_Larmor_radius)
+    CALL z_position_to_beta_ion(BB, beta_ion)
+    CALL z_position_to_ion_Larmor_radius(BB, ion_Larmor_radius)
 
     ion_gyrofrequency = charge * BB / ion_mass / c_normal
 
@@ -439,8 +438,8 @@ subroutine electrostatic_potential_to_EE_wave_perp_phi(electrostatic_potential, 
     DOUBLE PRECISION :: BB, beta_ion, ion_Larmor_radius, ion_gyrofrequency
 
     CALL z_position_to_BB(z_position, BB)
-    CALL z_position_to_beta_ion(z_position, BB, beta_ion)
-    CALL z_position_to_ion_Larmor_radius(z_position, BB, ion_Larmor_radius)
+    CALL z_position_to_beta_ion(BB, beta_ion)
+    CALL z_position_to_ion_Larmor_radius(BB, ion_Larmor_radius)
 
     ion_gyrofrequency = charge * BB / ion_mass / c_normal
 
@@ -468,7 +467,7 @@ subroutine electrostatic_potential_to_BB_wave_para(electrostatic_potential, wave
     DOUBLE PRECISION :: BB, beta_ion
 
     CALL z_position_to_BB(z_position, BB)
-    CALL z_position_to_beta_ion(z_position, BB, beta_ion)
+    CALL z_position_to_beta_ion(BB, beta_ion)
 
     BB_wave_para = beta_ion / 2d0 * (1 + Temperature_electron / Temperature_ion) * charge / Temperature_ion * BB &
                     & * electrostatic_potential * COS(wave_phase)
@@ -546,7 +545,7 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force, wave_exist_parameter)
+subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
     !p -> particle
 
     use constant_parameter, only: pi
@@ -556,7 +555,7 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force, wave_exis
     implicit none
 
     DOUBLE PRECISION, INTENT(IN) :: z_position(-n_z:n_z), wave_phase(-n_z:n_z)
-    DOUBLE PRECISION, INTENT(IN) :: z_p, u_p(0:2), wave_exist_parameter
+    DOUBLE PRECISION, INTENT(IN) :: z_p, u_p(0:2)
     DOUBLE PRECISION, INTENT(OUT) :: force(0:2)
     DOUBLE PRECISION :: gamma, ratio, BB_p, dB_dz_p, wave_number_perp_p, wave_number_para_p, wave_frequency_p, force_wave(0:2)
     DOUBLE PRECISION :: electrostatic_potential_p, wave_phase_p, wave_phase_p_update, EE_wave_para_p, EE_wave_perp_perp_p
@@ -567,8 +566,8 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force, wave_exis
     CALL z_particle_to_position(z_p, z_position, i_z_left, i_z_right, ratio)
     CALL z_position_to_BB(z_p, BB_p)
     CALL z_particle_to_dB_dz(z_p, dB_dz_p)
-    CALL z_position_to_wave_frequency(z_p, wave_frequency_p)
-    CALL z_position_to_wave_number_perp(z_p, BB_p, wave_number_perp_p)
+    CALL z_position_to_wave_frequency(wave_frequency_p)
+    CALL z_position_to_wave_number_perp(BB_p, wave_number_perp_p)
     CALL z_position_to_wave_number_para(z_p, BB_p, wave_number_perp_p, wave_number_para_p)
     CALL z_position_to_electrostatic_potential(z_p, electrostatic_potential_p)
 
@@ -615,16 +614,14 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_particle, equator_flag, edge_flag, &
-    & wave_exist_parameter)
+subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_particle, edge_flag)
 
     use constants_in_the_simulations, only: d_t, n_z, L_z, d_z
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_in(-n_z:n_z), wave_phase_in(-n_z:n_z), wave_exist_parameter
+    DOUBLE PRECISION, INTENT(IN) :: z_in(-n_z:n_z), wave_phase_in(-n_z:n_z)
     DOUBLE PRECISION, INTENT(INOUT) :: z_particle, u_particle(0:2)
-    INTEGER, INTENT(OUT) :: equator_flag
     INTEGER, INTENT(OUT) :: edge_flag
     DOUBLE PRECISION :: ff_RK_1(0:2), ff_RK_2(0:2), ff_RK_3(0:2), ff_RK_4(0:2), u_particle_s(0:2)
     DOUBLE PRECISION :: kk_RK_1, kk_RK_2, kk_RK_3, kk_RK_4
@@ -634,19 +631,16 @@ subroutine particle_update_by_runge_kutta(z_in, wave_phase_in, z_particle, u_par
 
     !RK4
     CALL u_particle_to_v_particle_para(u_particle_s, kk_RK_1)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle, u_particle, ff_RK_1, wave_exist_parameter)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle, u_particle, ff_RK_1)
 
     CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_1 / 2d0 * d_t, kk_RK_2)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_1 / 2d0 * d_t, u_particle_s + ff_RK_1 / 2d0 * d_t, ff_RK_2, &
-        & wave_exist_parameter)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_1 / 2d0 * d_t, u_particle_s + ff_RK_1 / 2d0 * d_t, ff_RK_2)
 
     CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_2 / 2d0 * d_t, kk_RK_3)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_2 / 2d0 * d_t, u_particle_s + ff_RK_2 / 2d0 * d_t, ff_RK_3, &
-    & wave_exist_parameter)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_2 / 2d0 * d_t, u_particle_s + ff_RK_2 / 2d0 * d_t, ff_RK_3)
 
     CALL u_particle_to_v_particle_para(u_particle_s + ff_RK_3 * d_t, kk_RK_4)
-    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_3 * d_t, u_particle_s + ff_RK_3 * d_t, ff_RK_4, &
-    & wave_exist_parameter)
+    CALL Motion_of_Equation(z_in, wave_phase_in, z_particle + kk_RK_3 * d_t, u_particle_s + ff_RK_3 * d_t, ff_RK_4)
 
     !particle update
     u_particle(:) = u_particle(:) + (ff_RK_1(:) + 2d0 * ff_RK_2(:) + 2d0 * ff_RK_3(:) + ff_RK_4(:)) * d_t / 6d0

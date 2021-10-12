@@ -30,8 +30,8 @@ program main
     do i_z = -n_z, n_z
         z_position(i_z) = DBLE(i_z) * d_z
         call z_position_to_BB(z_position(i_z), BB(i_z))
-        call z_position_to_wave_frequency(z_position(i_z), wave_frequency(i_z))
-        call z_position_to_wave_number_perp(z_position(i_z), BB(i_z), wave_number_perp(i_z))
+        call z_position_to_wave_frequency(wave_frequency(i_z))
+        call z_position_to_wave_number_perp(BB(i_z), wave_number_perp(i_z))
         call z_position_to_wave_number_para(z_position(i_z), BB(i_z), wave_number_perp(i_z), wave_number_para(i_z))
 
         !initial wave_phase profile
@@ -54,7 +54,7 @@ program main
     print *, clock
 
     !count the quantity of the data
-    WRITE(file_data, '(A27)') 'initial_condition_test1.csv'
+    WRITE(file_data, '(A27)') 'initial_condition_test.csv'
     !WRITE(file_data, '(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     OPEN (500, file = file_data)
     N_particle = 0
@@ -82,7 +82,7 @@ program main
 
     
     !get the values
-    WRITE(file_data, '(A27)') 'initial_condition_test2.csv'
+    WRITE(file_data, '(A27)') 'initial_condition_test.csv'
     open (500, file = file_data)
 
     do i = 1, N_particle
@@ -122,7 +122,7 @@ program main
         WRITE(file_check, '(A23, I3.3, A19)') 'results_particle/myrank', myrank, '/potential_prof.dat'
         OPEN(unit = 10, file = file_check)
         do i_z = -n_z, n_z
-            CALL z_position_to_ion_Larmor_radius(z_position(i_z), BB(i_z), ion_Larmor_radius(i_z))
+            CALL z_position_to_ion_Larmor_radius(BB(i_z), ion_Larmor_radius(i_z))
             CALL z_position_to_electrostatic_potential(z_position(i_z), electrostatic_potential(i_z))
             call electrostatic_potential_to_EE_wave_para(electrostatic_potential(i_z), wave_number_para(i_z), wave_phase(i_z), &
                 & EE_wave_para(i_z))
@@ -134,7 +134,7 @@ program main
                 & BB_wave_para(i_z))
             CAll electrostatic_potential_to_BB_wave_perp(electrostatic_potential(i_z), wave_phase(i_z), wave_frequency(i_z), &
                 & wave_number_para(i_z), wave_number_perp(i_z), BB_wave_perp(i_z))
-            call z_position_to_alfven_velocity(z_position(i_z), BB(i_z), alfven_velocity(i_z))
+            call z_position_to_alfven_velocity(BB(i_z), alfven_velocity(i_z))
             print *, z_position(i_z), 'ep = ', electrostatic_potential(i_z), 'ion_Larmor_radius =', ion_Larmor_radius(i_z) 
             print *, z_position(i_z), 'wnperp = ', wave_number_perp(i_z), 'Te = ', Temperature_electron
             print *, z_position(i_z), 'Ti = ', Temperature_ion, 'ep0 = ', electrostatic_potential(i_z)

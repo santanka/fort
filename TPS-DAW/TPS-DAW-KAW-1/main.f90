@@ -54,7 +54,7 @@ program main
     print *, clock
 
     !count the quantity of the data
-    WRITE(file_data, '(A27)') 'initial_condition_test.csv'
+    WRITE(file_data, '(A26)') 'initial_condition_test.csv'
     !WRITE(file_data, '(A17, I3.3, A4)') 'initial_condition', myrank, '.dat'
     OPEN (500, file = file_data)
     N_particle = 0
@@ -82,7 +82,7 @@ program main
 
     
     !get the values
-    WRITE(file_data, '(A27)') 'initial_condition_test.csv'
+    WRITE(file_data, '(A26)') 'initial_condition_test.csv'
     open (500, file = file_data)
 
     do i = 1, N_particle
@@ -90,7 +90,7 @@ program main
 
         energy0(i) = energy0(i) * 1d3 * (q*c/1d1) * 1d7 / J_unit ![keV]→[eV]→[erg]→[]
        
-        gamma0(i) = energy0(i) / electron_mass / c_normal**2d0 + 1d0 !!m_e要調整
+        gamma0(i) = energy0(i) / electron_mass / c_normal**2d0 + 1d0
         !print *, i, myrank, energy0(i), gamma0(i)
 
         v_particle = SQRT(1d0 - 1d0/gamma0(i)**2) * c_normal
@@ -142,10 +142,19 @@ program main
             print *, z_position(i_z), 'wnpara = ', wave_number_para(i_z)
             print *, z_position(i_z), 'Ewpara = ', EE_wave_para(i_z)
             print *
-            WRITE(10, '(13E15.7)') z_position(i_z), wave_number_para(i_z), wave_number_perp(i_z), wave_frequency(i_z), &
-                & wave_frequency(i_z)/wave_number_para(i_z), electrostatic_potential(i_z), EE_wave_para(i_z), &
-                & EE_wave_perp_perp(i_z), EE_wave_perp_phi(i_z), BB_wave_para(i_z), BB_wave_perp(i_z), alfven_velocity(i_z), &
-                & ion_Larmor_radius(i_z)
+            WRITE(10, '(13E15.7)') z_position(i_z) * z_unit * 1d-2 / R_E, & ![]→[cm]→[m]→[/R_E]
+                                & wave_number_para(i_z) / z_unit * 1d2 , & ![]→[rad/cm]→[rad/m]
+                                & wave_number_perp(i_z) / z_unit * 1d2, & ![]→[rad/cm]→[rad/m]
+                                & wave_frequency(i_z) / t_unit, & ![]→[rad/s]
+                                & wave_frequency(i_z)/wave_number_para(i_z) * z_unit / t_unit / 1d2, & ![]→[cm/s]→[m/s]
+                                & electrostatic_potential(i_z) * V_unit * c / 1d8, & ![]→[statV]→[V]
+                                & EE_wave_para(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
+                                & EE_wave_perp_perp(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
+                                & EE_wave_perp_phi(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
+                                & BB_wave_para(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
+                                & BB_wave_perp(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
+                                & alfven_velocity(i_z) * z_unit / t_unit / 1d2, & ![]→[cm/s]→[m/s]
+                                & ion_Larmor_radius(i_z) * z_unit * 1d-2 ![]→[cm]→[m]
         end do !i_z
         wave_exist_parameter = 1d0
         CLOSE(10)

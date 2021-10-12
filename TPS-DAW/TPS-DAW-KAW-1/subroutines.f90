@@ -61,7 +61,9 @@ subroutine z_position_to_number_density(number_density)
 
     number_density = number_density_eq
 
-    if (isnan(number_density)) then
+    if (number_density /= number_density) then
+        print *, number_density
+        print *, number_density_eq
         print *, 'z_position_to_number_density: number_density = NaN'
     end if
 
@@ -121,9 +123,11 @@ subroutine z_position_to_wave_frequency(wave_frequency)
 
     DOUBLE PRECISION, INTENT(OUT) :: wave_frequency
 
-    wave_frequency = 2d0 * pi / 2d0
+    wave_frequency = 2d0 * pi / 2d0 * t_unit
 
-    if (isnan(wave_frequency)) then
+    if (wave_frequency /= wave_frequency) then
+        print *, wave_frequency
+        print *, 2d0 * pi / 2d0
         print *, 'z_position_to_wave_frequency: wave_frequency = NaN'
     end if
 

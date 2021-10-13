@@ -577,27 +577,28 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
 
     wave_phase_p = (1d0 - ratio) * wave_phase(i_z_left) + ratio * wave_phase(i_z_right)
 
-    CALL wave_phase_plus_perp_contribution(wave_phase_p, wave_number_perp_p, electrostatic_potential_p, z_p, BB_p, u_p, &
-                                            & wave_phase_p_update)
-                            
-    wave_phase_p = wave_phase_p_update
+    !CALL wave_phase_plus_perp_contribution(wave_phase_p, wave_number_perp_p, electrostatic_potential_p, z_p, BB_p, u_p, &
+    !                                        & wave_phase_p_update)
+    !                        
+    !wave_phase_p = wave_phase_p_update
 
     CALL electrostatic_potential_to_EE_wave_para(electrostatic_potential_p, wave_number_para_p, wave_phase_p, EE_wave_para_p)
-    CALL electrostatic_potential_to_EE_wave_perp_perp(electrostatic_potential_p, wave_frequency_p, wave_number_perp_p, &
-                                                        & wave_phase_p, z_p, u_p(2), EE_wave_perp_perp_p)
-    CALL electrostatic_potential_to_EE_wave_perp_phi(electrostatic_potential_p, wave_frequency_p, wave_number_perp_p, &
-                                                    & wave_phase_p, z_p, u_p(2), EE_wave_perp_phi_p)
-    CALL electrostatic_potential_to_BB_wave_para(electrostatic_potential_p, wave_phase_p, z_p, BB_wave_para_p)
-    CALL electrostatic_potential_to_BB_wave_perp(electrostatic_potential_p, wave_phase_p, wave_frequency_p, wave_number_para_p, &
-                                                & wave_number_perp_p, BB_wave_perp_p)
+    !CALL electrostatic_potential_to_EE_wave_perp_perp(electrostatic_potential_p, wave_frequency_p, wave_number_perp_p, &
+    !                                                    & wave_phase_p, z_p, u_p(2), EE_wave_perp_perp_p)
+    !CALL electrostatic_potential_to_EE_wave_perp_phi(electrostatic_potential_p, wave_frequency_p, wave_number_perp_p, &
+    !                                                & wave_phase_p, z_p, u_p(2), EE_wave_perp_phi_p)
+    !CALL electrostatic_potential_to_BB_wave_para(electrostatic_potential_p, wave_phase_p, z_p, BB_wave_para_p)
+    !CALL electrostatic_potential_to_BB_wave_perp(electrostatic_potential_p, wave_phase_p, wave_frequency_p, wave_number_para_p, &
+    !                                            & wave_number_perp_p, BB_wave_perp_p)
+    BB_wave_para_p = 0E0
 
     !force(EE_wave & BB_wave_perp)
     force_wave(0) = - charge * EE_wave_para_p / electron_mass &
-                    & - charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(1) * COS(u_p(2))
-    force_wave(1) = - charge * EE_wave_perp_perp_p / electron_mass &
-                    & + charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) * COS(u_p(2))
-    force_wave(2) = + charge * EE_wave_perp_phi_p / electron_mass / gamma / c_normal * gamma * c_normal / u_p(1) &
-                    & - charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) / u_p(1) * SIN(u_p(2))
+                    & - 0 !charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(1) * COS(u_p(2))
+    force_wave(1) =  0 !- charge * EE_wave_perp_perp_p / electron_mass &
+                    !& + charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) * COS(u_p(2))
+    force_wave(2) = 0 !+ charge * EE_wave_perp_phi_p / electron_mass / gamma / c_normal * gamma * c_normal / u_p(1) &
+                    !& - charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) / u_p(1) * SIN(u_p(2))
 
     !force
     force(0) = - u_p(1)**2d0 / 2d0 / (BB_p + BB_wave_para_p) / gamma * dB_dz_p + force_wave(0)

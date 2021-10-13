@@ -36,8 +36,8 @@ pitch_angle_eq = df[:, 7] #deg
 v_z_particle = u_z_particle / np.sqrt(1 + (u_z_particle**2 + u_perp_particle**2)/c**2)
 v_perp_particle = u_perp_particle / np.sqrt(1 + (u_z_particle**2 + u_perp_particle**2)/c**2)
 
-channel = 1
-trigger = 0 #(1: wave_check)
+channel = 10
+trigger = 1 #(1: wave_check)
 
 if (trigger == 1):
     df2 = np.genfromtxt(r"/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/potential_prof.dat")
@@ -63,7 +63,7 @@ if (channel == 1):
     fig = plt.figure()
     plt.rcParams["font.size"] = 40
     plt.rcParams.update({'mathtext.default': 'default', 'mathtext.fontset': 'stix'})
-    ax = fig.add_subplot(111, xlabel='z [RE]', ylabel='$v_{\parallel}/c$')    
+    ax = fig.add_subplot(111, xlabel='z [$R_E$]', ylabel='$v_{\parallel}/c$')    
     ax.plot(z_particle, v_z_particle/c, zorder=1, color='b')
     ax.scatter(z_particle[0], v_z_particle[0]/c, marker='o', color='r', label='start', zorder=3, s=200)
     ax.scatter(z_particle[length-1], v_z_particle[length-1]/c, marker='D', color='r', label='goal', zorder=3, s=200)  #[len(z_particle)-1]
@@ -126,10 +126,10 @@ if (channel == 5 and trigger == 1):
     plt.rcParams.update({'mathtext.default': 'default', 'mathtext.fontset': 'stix'})
     plt.rcParams['text.usetex'] = True
     fig = plt.figure()
-    ax = fig.add_subplot(111, xlabel='z [RE]', ylabel='length [km]', yscale='log')    
+    ax = fig.add_subplot(111, xlabel=r'z [$\rm{R_E}$]', ylabel='length [km]', yscale='log')    
     ax.plot(z_position, np.abs(2*np.pi/wave_number_para/10**3), label=r'$\lambda_{\parallel}$', linewidth='4')
     ax.plot(z_position, np.abs(2*np.pi/wave_number_perp/10**3), label=r'$\lambda_{\perp}$', linewidth='4')
-    ax.plot(z_position, np.abs(ion_Larmor_radius/ 10**3), label=r'$\rho_i$', linewidth='4')
+    #ax.plot(z_position, np.abs(ion_Larmor_radius/ 10**3), label=r'$\rho_i$', linewidth='4')
     #ax.plot(z_position, ion_Larmor_radius*wave_number_perp)
     #fig.suptitle('wavelength [km]')
     ax.minorticks_on()
@@ -238,13 +238,13 @@ if (channel == 10):
         
         MLAT[jj] = MLAT1
     
-    mu = m * (v_perp_particle*c)**2. / 2. / B0_eq * np.cos(MLAT)**6 / np.sqrt(1+3*np.sin(MLAT)**2)
+    mu = m * (v_perp_particle)**2. / 2. / B0_eq * np.cos(MLAT)**6 / np.sqrt(1+3*np.sin(MLAT)**2)
 
     fig = plt.figure()
     plt.rcParams["font.size"] = 40
     plt.rcParams.update({'mathtext.default': 'default', 'mathtext.fontset': 'stix'})
     ax = fig.add_subplot(111, xlabel='time [$s$]', ylabel='1st adiabatic invariant [$Am^2$]')
-    ax.plot(time[0:900000], mu[0:900000])
+    ax.plot(time, mu)
     #fig.suptitle('1st adiabatic invariant [Am^2]')
     ax.minorticks_on()
     ax.grid(which="both")

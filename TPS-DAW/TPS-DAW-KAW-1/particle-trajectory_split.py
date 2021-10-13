@@ -1,7 +1,7 @@
 import numpy as np
 
 
-input_file = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/particle_trajectory00'
+input_file = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/particle_trajectory01'
 df = np.genfromtxt(input_file + '.dat', filling_values=np.nan)
 
 line_count = 0

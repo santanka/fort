@@ -4,7 +4,7 @@ from matplotlib import mathtext
 from numpy.lib.twodim_base import tri
 mathtext.FontConstantsBase = mathtext.ComputerModernFontConstants
 
-df = np.genfromtxt(r"/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/particle_trajectory00-15.dat")
+df = np.genfromtxt(r"/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/particle_trajectory01-102.dat")
 
 #規格化定数
 c  = 299792458E0
@@ -33,11 +33,11 @@ u_perp_particle = df[:, 4]
 u_phase_particle = df[:, 5]
 energy_particle = df[:, 6]
 pitch_angle_eq = df[:, 7] #deg
-v_z_particle = u_z_particle / np.sqrt(1 + u_z_particle**2 + u_perp_particle**2)
-v_perp_particle = u_perp_particle / np.sqrt(1 + u_z_particle**2 + u_perp_particle**2)
+v_z_particle = u_z_particle / np.sqrt(1 + (u_z_particle**2 + u_perp_particle**2)/c**2)
+v_perp_particle = u_perp_particle / np.sqrt(1 + (u_z_particle**2 + u_perp_particle**2)/c**2)
 
 channel = 1
-trigger = 1 #(1: wave_check)
+trigger = 0 #(1: wave_check)
 
 if (trigger == 1):
     df2 = np.genfromtxt(r"/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/potential_prof.dat")
@@ -59,7 +59,7 @@ if (trigger == 1):
     ion_Larmor_radius = df2[:, 12]
 
 if (channel == 1):
-    length = len(z_position)
+    length = len(z_particle)
     fig = plt.figure()
     plt.rcParams["font.size"] = 40
     plt.rcParams.update({'mathtext.default': 'default', 'mathtext.fontset': 'stix'})

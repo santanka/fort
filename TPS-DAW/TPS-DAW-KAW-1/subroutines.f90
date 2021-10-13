@@ -168,7 +168,7 @@ subroutine z_position_to_beta_ion(BB, beta_ion)
 
     CALL z_position_to_number_density(number_density)
 
-    beta_ion = 8d0 * number_density * Temperature_ion / BB**2d0
+    beta_ion = 8d0 * pi * number_density * Temperature_ion / BB**2d0
 
     if (isnan(beta_ion)) then
         print *, 'z_position_to_beta_ion: beta_ion = NaN'

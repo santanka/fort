@@ -143,17 +143,17 @@ program main
             print *, z_position(i_z), 'Ewpara = ', EE_wave_para(i_z)
             print *
             WRITE(10, '(13E15.7)') z_position(i_z) * z_unit * 1d-2 / R_E, & ![]→[cm]→[m]→[/R_E]
-                                & wave_number_para(i_z) / z_unit * 1d2 , & ![]→[rad/cm]→[rad/m]
-                                & wave_number_perp(i_z) / z_unit * 1d2, & ![]→[rad/cm]→[rad/m]
-                                & wave_frequency(i_z) / t_unit, & ![]→[rad/s]
-                                & wave_frequency(i_z)/wave_number_para(i_z) * z_unit / t_unit / 1d2, & ![]→[cm/s]→[m/s]
+                                & wave_number_para(i_z) / z_unit * 1d2 , & ![rad]→[rad/cm]→[rad/m]
+                                & wave_number_perp(i_z) / z_unit * 1d2, & ![rad]→[rad/cm]→[rad/m]
+                                & wave_frequency(i_z) / t_unit, & ![rad]→[rad/s]
+                                & wave_frequency(i_z)/wave_number_para(i_z) * c / 1d2, & ![]→[cm/s]→[m/s]
                                 & electrostatic_potential(i_z) * V_unit * c / 1d8, & ![]→[statV]→[V]
                                 & EE_wave_para(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
                                 & EE_wave_perp_perp(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
                                 & EE_wave_perp_phi(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
                                 & BB_wave_para(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
                                 & BB_wave_perp(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
-                                & alfven_velocity(i_z) * z_unit / t_unit / 1d2, & ![]→[cm/s]→[m/s]
+                                & alfven_velocity(i_z) * c / 1d2, & ![]→[cm/s]→[m/s]
                                 & ion_Larmor_radius(i_z) * z_unit * 1d-2 ![]→[cm]→[m]
         end do !i_z
         wave_exist_parameter = 1d0

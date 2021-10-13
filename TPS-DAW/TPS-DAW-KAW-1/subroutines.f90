@@ -127,7 +127,7 @@ subroutine z_position_to_wave_frequency(wave_frequency)
 
     if (wave_frequency /= wave_frequency) then
         print *, wave_frequency
-        print *, 2d0 * pi / 2d0
+        print *, 2d0 * pi / 2d0 * t_unit
         print *, 'z_position_to_wave_frequency: wave_frequency = NaN'
     end if
 

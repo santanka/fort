@@ -27,7 +27,7 @@ V_unit = m * c**2E0 / q
 
 
 time = df[:, 1]
-z_particle = df[:, 2]
+z_particle = df[:, 2]/R_E
 u_z_particle = df[:, 3]
 u_perp_particle = df[:, 4]
 u_phase_particle = df[:, 5]
@@ -36,7 +36,7 @@ pitch_angle_eq = df[:, 7] #deg
 v_z_particle = u_z_particle / np.sqrt(1 + u_z_particle**2 + u_perp_particle**2)
 v_perp_particle = u_perp_particle / np.sqrt(1 + u_z_particle**2 + u_perp_particle**2)
 
-channel = 6
+channel = 1
 trigger = 1 #(1: wave_check)
 
 if (trigger == 1):
@@ -68,10 +68,10 @@ if (channel == 1):
     ax.scatter(z_particle[0], v_z_particle[0]/c, marker='o', color='r', label='start', zorder=3, s=200)
     ax.scatter(z_particle[length-1], v_z_particle[length-1]/c, marker='D', color='r', label='goal', zorder=3, s=200)  #[len(z_particle)-1]
     if (trigger == 1):
-        ax.plot(z_position, V_resonant, linestyle='-.', color='red', linewidth='4')
-        ax.plot(z_position, Alfven_velocity, linestyle='-.', color='orange', linewidth='4')
-        ax.plot(z_position, V_resonant_wide_plus, linestyle='-.', color='green', linewidth='4')
-        ax.plot(z_position, V_resonant_wide_minus, linestyle='-.', color='green', linewidth='4')
+        ax.plot(z_position, V_resonant/c, linestyle='-.', color='red', linewidth='4')
+        ax.plot(z_position, Alfven_velocity/c, linestyle='-.', color='orange', linewidth='4')
+        ax.plot(z_position, V_resonant_wide_plus/c, linestyle='-.', color='green', linewidth='4')
+        ax.plot(z_position, V_resonant_wide_minus/c, linestyle='-.', color='green', linewidth='4')
     #fig.suptitle('particle trajectory')
     ax.minorticks_on()
     ax.grid(which="both")

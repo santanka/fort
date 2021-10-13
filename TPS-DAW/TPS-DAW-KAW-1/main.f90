@@ -88,7 +88,7 @@ program main
     do i = 1, N_particle
         read(500,*,iostat=ios) energy0(i), alpha0(i), z_particle(i), alpha_eq(i)
 
-        energy0(i) = energy0(i) * 1d3 * (q*c/1d1) * 1d7 / J_unit ![keV]→[eV]→[erg]→[]
+        energy0(i) = energy0(i) * 1d3 * (q/c*1d1) * 1d7 / J_unit ![keV]→[eV]→[erg]→[]
        
         gamma0(i) = energy0(i) / electron_mass / c_normal**2d0 + 1d0
         !print *, i, myrank, energy0(i), gamma0(i)
@@ -135,6 +135,8 @@ program main
             CAll electrostatic_potential_to_BB_wave_perp(electrostatic_potential(i_z), wave_phase(i_z), wave_frequency(i_z), &
                 & wave_number_para(i_z), wave_number_perp(i_z), BB_wave_perp(i_z))
             call z_position_to_alfven_velocity(BB(i_z), alfven_velocity(i_z))
+            CALL z_position_to_beta_ion(BB(i_z), beta_ion(i_z))
+            CALL z_position_to_number_density(number_density(i_z))
             print *, z_position(i_z), 'ep = ', electrostatic_potential(i_z), 'ion_Larmor_radius =', ion_Larmor_radius(i_z) 
             print *, z_position(i_z), 'wnperp = ', wave_number_perp(i_z), 'Te = ', Temperature_electron
             print *, z_position(i_z), 'Ti = ', Temperature_ion, 'ep0 = ', electrostatic_potential(i_z)
@@ -142,19 +144,24 @@ program main
             print *, z_position(i_z), 'wnpara = ', wave_number_para(i_z)
             print *, z_position(i_z), 'Ewpara = ', EE_wave_para(i_z)
             print *
-            WRITE(10, '(13E15.7)') z_position(i_z) * z_unit * 1d-2 / R_E, & ![]→[cm]→[m]→[/R_E]
+            WRITE(10, '(18E15.7)') z_position(i_z) * z_unit * 1d-2 / R_E, & ![]→[cm]→[m]→[/R_E]
                                 & wave_number_para(i_z) / z_unit * 1d2 , & ![rad]→[rad/cm]→[rad/m]
                                 & wave_number_perp(i_z) / z_unit * 1d2, & ![rad]→[rad/cm]→[rad/m]
                                 & wave_frequency(i_z) / t_unit, & ![rad]→[rad/s]
                                 & wave_frequency(i_z)/wave_number_para(i_z) * c / 1d2, & ![]→[cm/s]→[m/s]
                                 & electrostatic_potential(i_z) * V_unit * c / 1d8, & ![]→[statV]→[V]
-                                & EE_wave_para(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
-                                & EE_wave_perp_perp(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
-                                & EE_wave_perp_phi(i_z) * V_unit / z_unit * c / 1d6, & ![]→[statV/cm]→[V/m]
+                                & EE_wave_para(i_z) * B0_eq * c / 1d6, & ![]→[statV/cm]→[V/m]
+                                & EE_wave_perp_perp(i_z) * B0_eq * c / 1d6, & ![]→[statV/cm]→[V/m]
+                                & EE_wave_perp_phi(i_z) * B0_eq * c / 1d6, & ![]→[statV/cm]→[V/m]
                                 & BB_wave_para(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
                                 & BB_wave_perp(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
                                 & alfven_velocity(i_z) * c / 1d2, & ![]→[cm/s]→[m/s]
-                                & ion_Larmor_radius(i_z) * z_unit * 1d-2 ![]→[cm]→[m]
+                                & ion_Larmor_radius(i_z) * z_unit * 1d-2, & ![]→[cm]→[m]
+                                & beta_ion(i_z), &
+                                & BB(i_z) * B0_eq / 1d4, & ![]→[G]→[T]
+                                & Temperature_ion * J_unit * 1d-7 / (q/c*1d1), &![]→[erg]→[J]→[eV]
+                                & Temperature_electron * J_unit * 1d-7 / (q/c*1d1), &![]→[erg]→[J]→[eV]
+                                & number_density(i_z) / z_unit**3d0 * 1d6 ![]→[cm^-3]→[m^-3]
         end do !i_z
         wave_exist_parameter = 1d0
         CLOSE(10)
@@ -234,11 +241,11 @@ program main
             
             WRITE(unit = N_file, fmt = '(I7.7, 7E15.7)') i_particle, &
                                                         & time * t_unit, & ![]→[s]
-                                                        & z_particle_sim * z_unit * 1d-2 / R_E, & ![]→[cm]→[m]→[/R_E]
-                                                        & u_particle_sim(0) * z_unit / t_unit * 1d-2, & ![]→[cm/s]→[m/s]
-                                                        & u_particle_sim(1) * z_unit / t_unit * 1d-2, & ![]→[cm/s]→[m/s]
+                                                        & z_particle_sim * z_unit * 1d-2, & ![]→[cm]→[m]
+                                                        & u_particle_sim(0) * c * 1d-2, & ![]→[cm/s]→[m/s]
+                                                        & u_particle_sim(1) * c * 1d-2, & ![]→[cm/s]→[m/s]
                                                         & MOD(u_particle_sim(2), 2d0 * pi) , & ![rad]
-                                                        & energy_particle * J_unit * 1d-7 / (q*c/1d1) , & ![]→[erg]→[J]→[eV]
+                                                        & energy_particle * J_unit * 1d-7 / (q/c*1d1) , & ![]→[erg]→[J]→[eV]
                                                         & alpha_particle_eq ![degree]
             if(mod(i_time, 100) == 1 .and. mod(i_particle, 100) == 1) then
                 print *, 'pass write: i_time =', i_time, ', i_particle =', i_particle

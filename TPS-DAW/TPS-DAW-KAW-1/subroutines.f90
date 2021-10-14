@@ -357,19 +357,34 @@ end subroutine
 !
 !!----------------------------------------------------------------------------------------------------------------------------------
 !
-subroutine z_particle_to_dB_dz(z_particle, dB_dz)
+subroutine z_particle_to_dB_dz(z_particle, B0, electrostatic_potential, wave_number_para, wave_phase, BB_wave_para, dB_dz)
 
-    use lshell_setting, only: r_eq
+    use constant_parameter
+    use lshell_setting
+    use constants_in_the_simulations
 
     implicit none
 
-    DOUBLE PRECISION, INTENT(IN) :: z_particle
+    DOUBLE PRECISION, INTENT(IN) :: z_particle, B0, electrostatic_potential, wave_number_para, wave_phase, BB_wave_para
     DOUBLE PRECISION, INTENT(OUT) :: dB_dz
-    DOUBLE PRECISION :: radius, MLAT
+    DOUBLE PRECISION :: radius, MLAT, dB0_dz, dBw_d0
 
     CALL z_position_to_radius_MLAT(z_particle, radius, MLAT)
 
-    dB_dz = 3d0 * DSIN(MLAT) * (5d0 * DSIN(MLAT)**2d0 + 3d0) / DCOS(MLAT)**8d0 / (3d0 * DSIN(MLAT)**2d0 + 1d0) / r_eq
+    dB0_dz = 3d0 * DSIN(MLAT) * (5d0 * DSIN(MLAT)**2d0 + 3d0) / DCOS(MLAT)**8d0 / (3d0 * DSIN(MLAT)**2d0 + 1d0) / r_eq
+
+    if(MLAT /= 0d0) then
+        dBw_d0 = - BB_wave_para / B0 &
+                & + BB_wave_para / electrostatic_potential * MLAT / ABS(MLAT) * 180d0 * electrostatic_potential_0 &
+                    & / pi / r_eq / COS(MLAT) / SQRT(1d0 + 3d0 * SIN(MLAT)**2d0) / COSH(360d0 / pi * ABS(MLAT) - 5d0)**2d0 &
+                & - wave_number_para * BB_wave_para * TAN(wave_phase)
+    
+    else if(MLAT == 0d0) then
+        dBw_d0 = 0d0
+    
+    end if
+
+    dB_dz = dB0_dz + dBw_d0
 
     if (isnan(dB_dz)) then
         print *, 'z_particle_to_dB_dz: dB_dz = NaN'
@@ -388,7 +403,7 @@ subroutine electrostatic_potential_to_EE_wave_para(electrostatic_potential, wave
     DOUBLE PRECISION, INTENT(IN) :: electrostatic_potential, wave_number_para, wave_phase
     DOUBLE PRECISION, INTENT(OUT) :: EE_wave_para
 
-    EE_wave_para = Temperature_electron / Temperature_ion * wave_number_para * electrostatic_potential * SIN(wave_phase)
+    EE_wave_para = (2d0 + Temperature_electron / Temperature_ion) * wave_number_para * electrostatic_potential * SIN(wave_phase)
 
     if (isnan(EE_wave_para)) then
         print *, 'electrostatic_potential_to_EE_wave_para: EE_wave_para = NaN'
@@ -569,11 +584,10 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
     CALL u_particle_to_gamma(u_p, gamma)
     CALL z_particle_to_position(z_p, z_position, i_z_left, i_z_right, ratio)
     CALL z_position_to_BB(z_p, BB_p)
-    CALL z_particle_to_dB_dz(z_p, dB_dz_p)
+    CALL z_position_to_electrostatic_potential(z_p, electrostatic_potential_p)
     CALL z_position_to_wave_frequency(wave_frequency_p)
     CALL z_position_to_wave_number_perp(BB_p, wave_number_perp_p)
     CALL z_position_to_wave_number_para(z_p, BB_p, wave_number_perp_p, wave_number_para_p)
-    CALL z_position_to_electrostatic_potential(z_p, electrostatic_potential_p)
 
     wave_phase_p = (1d0 - ratio) * wave_phase(i_z_left) + ratio * wave_phase(i_z_right)
 
@@ -590,13 +604,15 @@ subroutine Motion_of_Equation(z_position, wave_phase, z_p, u_p, force)
     !CALL electrostatic_potential_to_BB_wave_para(electrostatic_potential_p, wave_phase_p, z_p, BB_wave_para_p)
     !CALL electrostatic_potential_to_BB_wave_perp(electrostatic_potential_p, wave_phase_p, wave_frequency_p, wave_number_para_p, &
     !                                            & wave_number_perp_p, BB_wave_perp_p)
-    BB_wave_para_p = 0E0
+    BB_wave_para_p = 0d0
+
+    CALL z_particle_to_dB_dz(z_p, BB_p, electrostatic_potential_p, wave_number_para_p, wave_phase_p, BB_wave_para_p, dB_dz_p)
 
     !force(EE_wave & BB_wave_perp)
     force_wave(0) = - charge * EE_wave_para_p / electron_mass &
-                    & - 0 !charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(1) * COS(u_p(2))
+                    & + 0 !charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(1) * SIN(u_p(2))
     force_wave(1) =  0 !- charge * EE_wave_perp_perp_p / electron_mass &
-                    !& + charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) * COS(u_p(2))
+                    !& - charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) * SIN(u_p(2))
     force_wave(2) = 0 !+ charge * EE_wave_perp_phi_p / electron_mass / gamma / c_normal * gamma * c_normal / u_p(1) &
                     !& - charge * BB_wave_perp_p / electron_mass / gamma / c_normal * u_p(0) / u_p(1) * SIN(u_p(2))
 

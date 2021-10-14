@@ -36,7 +36,7 @@ pitch_angle_eq = df[:, 7] #deg
 v_z_particle = u_z_particle / np.sqrt(1 + (u_z_particle**2 + u_perp_particle**2)/c**2)
 v_perp_particle = u_perp_particle / np.sqrt(1 + (u_z_particle**2 + u_perp_particle**2)/c**2)
 
-channel = 10
+channel = 5
 trigger = 1 #(1: wave_check)
 
 if (trigger == 1):
@@ -122,6 +122,12 @@ if (channel == 4 and trigger == 1):
     ax.grid(which="both")
 
 if (channel == 5 and trigger == 1):
+    lambda_E = np.arccos(L**(-0.5))
+    lam = np.linspace(-lambda_E, lambda_E, 10000)
+    ss = L * ((1. / 2.) * np.sin(lam) * np.sqrt(3. * np.sin(lam)**2. + 1.) \
+        + (1. / (2. * np.sqrt(3.))) * np.log(np.sqrt(3.) * np.sin(lam) + np.sqrt(3. * np.sin(lam)**2. + 1.)))
+    dlog_dz = 3 * np.sin(lam) / R_E / L / np.log(10) / np.sqrt(1 + 3 * np.sin(lam)**2) * (1/(1 + 3 * np.sin(lam)**2) + 2/(np.cos(lam)**2))
+
     plt.rcParams["font.size"] = 40
     plt.rcParams.update({'mathtext.default': 'default', 'mathtext.fontset': 'stix'})
     plt.rcParams['text.usetex'] = True
@@ -129,12 +135,13 @@ if (channel == 5 and trigger == 1):
     ax = fig.add_subplot(111, xlabel=r'z [$\rm{R_E}$]', ylabel='length [km]', yscale='log')    
     ax.plot(z_position, np.abs(2*np.pi/wave_number_para/10**3), label=r'$\lambda_{\parallel}$', linewidth='4')
     ax.plot(z_position, np.abs(2*np.pi/wave_number_perp/10**3), label=r'$\lambda_{\perp}$', linewidth='4')
+    ax.plot(ss, 1/abs(dlog_dz) / 1E3, label=r'$\left( \frac{d \left( \rm{log}_{10} \frac{B_0}{B_E} \right)}{dz} \right)^{-1}$', linewidth='4')
     #ax.plot(z_position, np.abs(ion_Larmor_radius/ 10**3), label=r'$\rho_i$', linewidth='4')
     #ax.plot(z_position, ion_Larmor_radius*wave_number_perp)
     #fig.suptitle('wavelength [km]')
     ax.minorticks_on()
     ax.grid(which="both")
-    ax.legend()
+    ax.legend(loc='upper right')
 
 if (channel == 6 and trigger == 1):
     fig = plt.figure()

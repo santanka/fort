@@ -13,8 +13,8 @@ program main
 
    
 
-    file_input1 = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-Artemyev/flux_calculation/myrank000/particle_trajectory00.dat'
-    file_input2 = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-Artemyev/flux_calculation/myrank000/particle_trajectory01.dat'
+    file_input1 = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/particle_trajectory00.dat'
+    file_input2 = '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/particle_trajectory01.dat'
 
     OPEN(100, file = file_input1)
     OPEN(200, file = file_input2)
@@ -26,13 +26,13 @@ program main
 
         if (i <= 51) then
             REWIND(100)
-            WRITE(file_output, '(A103, I3.3, A4)') '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-Artemyev/flux_calculation/&
-                &myrank000/particle_trajectory00-', i, '.dat'
+            WRITE(file_output, '(A100, I3.3, A4)') '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/&
+                &particle_trajectory00-', i, '.dat'
             OPEN(50, file = file_output)
         else if (i >= 52) then
             REWIND(200)
-            WRITE(file_output, '(A103, I3.3, A4)') '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-Artemyev/flux_calculation/&
-            &myrank000/particle_trajectory01-', i, '.dat'
+            WRITE(file_output, '(A100, I3.3, A4)') '/home/satanka/Documents/fort/TPS-DAW/TPS-DAW-KAW-1/results_particle/myrank000/&
+            &particle_trajectory01-', i, '.dat'
             OPEN(50, file = file_output)
         end if
 

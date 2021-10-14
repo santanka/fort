@@ -23,7 +23,7 @@ module constants_in_the_simulations
   !-------------------------------------
   ! initial setting of wave
   !-------------------------------------
-  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 200d0 * 1d8 / c / V_unit ![V]?[statV]?[]
+  DOUBLE PRECISION, PARAMETER :: electrostatic_potential_0 = 600d0 * 1d8 / c / V_unit ![V]?[statV]?[]
 
   !-------------------------------------
   ! initial setting of particle
